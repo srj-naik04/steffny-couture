@@ -1,6 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { Image } from 'expo-image';
-import { Camera, ImageIcon, Plus, RefreshCw } from 'lucide-react-native';
+import { Camera, ImageIcon, Plus, RefreshCw, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, View } from 'react-native';
 
@@ -122,7 +122,7 @@ export function PhotoUploader() {
                   haptics.warning();
                   setDeleteId(tile.id);
                 }}
-                accessibilityLabel={`Garment photo. ${tile.status}. Long-press to remove.`}
+                accessibilityLabel={`Garment photo, ${tile.status}.`}
                 className="aspect-square flex-1 overflow-hidden rounded-xl border border-border bg-surfaceAlt">
                 <Image
                   source={{ uri: tile.localUri }}
@@ -141,6 +141,16 @@ export function PhotoUploader() {
                       Retry
                     </Text>
                   </View>
+                ) : null}
+                {tile.status !== 'uploading' ? (
+                  <PressableScale
+                    haptic="warning"
+                    onPress={() => setDeleteId(tile.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Remove photo"
+                    className="absolute right-1.5 top-1.5 h-8 w-8 items-center justify-center rounded-full bg-ink/70">
+                    <Trash2 size={15} color={colors.ivory} strokeWidth={2} />
+                  </PressableScale>
                 ) : null}
               </PressableScale>
             ),

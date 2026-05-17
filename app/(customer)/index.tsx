@@ -159,6 +159,17 @@ export default function CustomerHome() {
       <Text variant="caption" className="mt-6 text-center text-inkSubtle">
         {ALTERATION_TYPES.length} alteration services · Bespoke, priced per job
       </Text>
+
+      <PressableScale
+        haptic="selection"
+        onPress={() => router.push('/login')}
+        accessibilityRole="button"
+        accessibilityLabel="Shop sign in for Steffny Couture staff"
+        className="mt-4 self-center py-2">
+        <Text variant="caption" className="uppercase tracking-wide text-inkSubtle">
+          Steffny Couture team · Sign in
+        </Text>
+      </PressableScale>
     </Screen>
   );
 }
