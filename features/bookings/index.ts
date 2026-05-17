@@ -75,3 +75,13 @@ export { useBookingHistory } from '@/features/bookings/hooks/use-booking-history
 export { useBookingPhotos } from '@/features/bookings/hooks/use-booking-photos';
 export { useCancelBooking } from '@/features/bookings/hooks/use-cancel-booking';
 export { useRescheduleBooking } from '@/features/bookings/hooks/use-reschedule-booking';
+
+// Shop-side hooks + API
+export { useShopBookings } from '@/features/bookings/hooks/use-shop-bookings';
+export { useUpdateBookingStatus } from '@/features/bookings/hooks/use-update-booking-status';
+export { useUpdateBooking } from '@/features/bookings/hooks/use-update-booking';
+export { useCreateManualBooking } from '@/features/bookings/hooks/use-create-manual-booking';
+export {
+  type BookingFields,
+  type ManualBookingInput,
+} from '@/features/bookings/api/shop-bookings';
