@@ -1,6 +1,7 @@
 import * as Linking from 'expo-linking';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CalendarPlus, MessageCircle } from 'lucide-react-native';
+import { useEffect } from 'react';
 
 import { SuccessCheck } from '@/components/booking/success-check';
 import { Box, Button, Card, Screen, Text } from '@/components/ui';
@@ -9,6 +10,8 @@ import { shop } from '@/constants/shop';
 import { addAppointmentToCalendar } from '@/lib/calendar';
 import { formatLong, formatTimeLabel } from '@/lib/date';
 import { getWhatsAppLink } from '@/lib/whatsapp';
+
+import { registerForPushNotifications } from '@/features/notifications';
 
 /**
  * The confirmed screen — terminal, not a wizard step (no progress bar). The
@@ -21,6 +24,12 @@ export default function ConfirmedScreen() {
     date: string;
     time: string;
   }>();
+
+  // The booking is done — now is the right moment to ask for push permission,
+  // not on app launch (CLAUDE.md §6.1, "no spam").
+  useEffect(() => {
+    void registerForPushNotifications();
+  }, []);
 
   const onWhatsApp = () => {
     void Linking.openURL(

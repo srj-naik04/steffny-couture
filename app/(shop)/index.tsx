@@ -2,6 +2,7 @@ import { startOfWeek } from 'date-fns';
 import { router } from 'expo-router';
 import { CircleAlert, Plus, TriangleAlert } from 'lucide-react-native';
 
+import { NotificationCenter } from '@/components/notifications/notification-center';
 import { KpiTile } from '@/components/shop/kpi-tile';
 import { ShopBookingCard } from '@/components/shop/shop-booking-card';
 import { Box, Card, EmptyState, Fab, Screen, Skeleton, Text } from '@/components/ui';
@@ -87,16 +88,19 @@ export default function ShopToday() {
       className="pb-8"
       onRefresh={() => void refetch()}
       refreshing={isRefetching}>
-      <Box className="pb-2 pt-2">
-        <Text variant="caption" className="uppercase text-gold">
-          {greeting()}
-          {firstName(profile?.full_name)
-            ? `, ${firstName(profile?.full_name)}`
-            : ''}
-        </Text>
-        <Text variant="hero" className="mt-1">
-          {formatLong(nowInLondon())}
-        </Text>
+      <Box className="flex-row items-start justify-between pb-2 pt-2">
+        <Box className="flex-1 pr-3">
+          <Text variant="caption" className="uppercase text-gold">
+            {greeting()}
+            {firstName(profile?.full_name)
+              ? `, ${firstName(profile?.full_name)}`
+              : ''}
+          </Text>
+          <Text variant="hero" className="mt-1">
+            {formatLong(nowInLondon())}
+          </Text>
+        </Box>
+        <NotificationCenter />
       </Box>
 
       <Box className="mt-5 flex-row gap-2.5">
