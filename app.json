@@ -18,7 +18,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "To photograph your garment for the alteration booking.",
         "NSPhotoLibraryUsageDescription": "To attach photos of your garment to the booking.",
-        "NSPhotoLibraryAddUsageDescription": "To save photos from your booking."
+        "NSPhotoLibraryAddUsageDescription": "To save photos from your booking.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -64,6 +65,12 @@
         "projectId": "c5458cf1-600b-4ef1-9a8d-10acefa1be71"
       }
     },
-    "owner": "shriraj04"
+    "owner": "shriraj04",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/c5458cf1-600b-4ef1-9a8d-10acefa1be71"
+    }
   }
 }
