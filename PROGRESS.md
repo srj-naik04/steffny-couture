@@ -4,9 +4,9 @@
 
 ## Where we are
 
-**Last updated:** 2026-05-17 — Phase 6 complete
-**Current phase:** Phase 6 — Notifications ✅ DONE
-**Next milestone:** Phase 7 — UI polish
+**Last updated:** 2026-05-17 — Phase 7 complete
+**Current phase:** Phase 7 — UI polish ✅ DONE
+**Next milestone:** Phase 8 — Demo preparation
 
 ## Status
 
@@ -22,7 +22,7 @@
 - ✅ **Phase 4: My bookings (customer side) — DONE**
 - ✅ **Phase 5: Shop dashboard + kanban — DONE**
 - ✅ **Phase 6: Notifications — DONE** (in-app live; push/email source written, deploy deferred)
-- ⬜ Phase 7: Polish (motion, haptics, accessibility)
+- ✅ **Phase 7: Polish — DONE**
 - ⬜ Phase 8: Demo prep (seed, branding, build)
 - ⬜ Phase 9: Production deployment
 
@@ -118,6 +118,15 @@
 - **Verified:** `npm run typecheck` clean · `npm run lint` clean · iOS production bundle exports · migration 009 applied + RPC smoke-tested.
 - **Deferred (credential-gated):** deploying `send-email`/`send-push` (needs the Supabase **access token**), SMTP credentials, the `pg_net` trigger / scheduled-function wiring that calls them, and live push/email verification. The in-app notification path is fully working without any of this.
 
+## Phase 7 — what was built
+
+- A polish audit found the universal checklist already largely met — Phases 3–6 were built skeleton-first, with empty/error states, pull-to-refresh, confirm-sheets, haptics, reduced-motion and `PressableScale` throughout (the skills enforced it). Phase 7 closed the three genuine gaps:
+- **Toast** — `lib/toast.ts` (Zustand store + `toast.success/error/info` helpers with haptics) + `components/ui/toast.tsx` (`ToastHost`, slide-in stack, auto-dismiss, tap-to-dismiss). Mounted at the app root; wired into the five booking mutation hooks (status update, cancel, reschedule, manual booking, field-save errors).
+- **Offline banner** — `@react-native-community/netinfo` (installed) + `components/ui/offline-banner.tsx`, mounted at the root; a slim banner appears while the device is offline.
+- **Keyboard avoidance** — `Screen` gained a `keyboardAvoiding` prop (`KeyboardAvoidingView`); applied to the form screens (manual booking, shop booking detail, login, reset).
+- **Verified:** `npm run typecheck` clean · `npm run lint` clean · iOS production bundle exports.
+- **Deferred:** offline mutation *queueing* (TanStack Query persistence) — heavier than the phase warrants; the banner conveys offline state. Toast swipe-to-dismiss simplified to tap + auto-dismiss.
+
 ## Open questions / pending decisions
 
 - ✅ GitHub: `main` + `develop` pushed to `https://github.com/srj-naik04/steffny-couture.git`.
@@ -131,6 +140,10 @@
 - ⏳ Confirm: Apple/Google account ownership.
 
 ## Recent changes
+
+### 2026-05-17 — Phase 7
+- Polish pass: built the Toast system, the offline banner (NetInfo), and `Screen` keyboard avoidance — the three gaps left by the skill-enforced polish of Phases 3–6.
+- Wired toast feedback into the five booking mutation hooks.
 
 ### 2026-05-17 — Phase 6
 - Built notifications: `notifications` table + status-history trigger, the notifications feature, `NotificationCenter` bell/badge/sheet wired into both apps, push registration after first booking.
@@ -181,7 +194,7 @@
 
 ## Notes for next session
 
-1. **First action:** `/phase-start 7` — UI polish pass (skeletons/empty/error states, motion, copy, accessibility, reduced-motion) across every screen.
+1. **First action:** `/phase-start 8` — Demo prep (branding assets/icon/splash, `app.json` identifiers, `scripts/seed.ts` with ~15 realistic bookings, demo script, distribution).
 1a. **Edge Function deploy owed:** `send-email` + `send-push` source is written but not deployed — needs the Supabase access token (`supabase functions deploy`) + SMTP secrets, then a `pg_net` trigger to call them on booking insert/status change. Until then status emails/push don't fire; the in-app notification centre does.
 2. **Phase 4 guests:** booking ids are stored on-device (`lib/guest-bookings.ts`); guests read/manage bookings via the migration-007 functions. The remembered ids are the only handle a guest has — clearing app data loses the list (acceptable; documented).
 3. **Device verification still owed:** the Phase 3 checks (book end-to-end, photos in Storage, reference match, no data loss) and the Phase 4 checks (list filters, timeline, realtime status update, WhatsApp link) need a physical iPhone. Shop login: `steffi@steffnycouture.co.uk` / `Steffny-Couture-2026`.
@@ -195,6 +208,7 @@
 
 ## Wins / blockers log
 
+- **2026-05-17 win:** Phase 7 polish green — Toast system, offline banner, keyboard avoidance; checklist audited; typecheck + lint clean, iOS bundle exports.
 - **2026-05-17 win:** Phase 6 notifications green — `notifications` table + trigger, in-app notification centre, push registration, 5 email templates + 2 Edge Functions; typecheck + lint clean, iOS bundle exports.
 - **2026-05-17 note:** Edge Function deployment + SMTP deferred (no Supabase access token / SMTP creds in the environment) — in-app notifications work without them.
 - **2026-05-17 win:** Phase 5 shop dashboard green — tab shell, Today, list/kanban/calendar, detail, manual booking, customers, settings; kanban drag-and-drop working; migration 008 applied; typecheck + lint clean, iOS bundle exports.
