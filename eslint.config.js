@@ -24,6 +24,15 @@ module.exports = defineConfig([
     },
   },
   {
-    ignores: ['dist/*', '.expo/*', 'node_modules/*', 'expo-env.d.ts'],
+    // Deno Edge Functions and server-rendered email templates are not part of
+    // the React Native app — Supabase typechecks and builds them, not us.
+    ignores: [
+      'dist/*',
+      '.expo/*',
+      'node_modules/*',
+      'expo-env.d.ts',
+      'emails/**',
+      'supabase/functions/**',
+    ],
   },
 ]);

@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { ArrowRight, AtSign, MapPin, Phone } from 'lucide-react-native';
 import { type ReactNode } from 'react';
 
+import { NotificationCenter } from '@/components/notifications/notification-center';
 import { Box, Button, Card, PressableScale, Screen, Text } from '@/components/ui';
 import { ALTERATION_TYPES } from '@/constants/alteration-types';
 import { colors } from '@/constants/brand';
@@ -58,9 +59,12 @@ export default function CustomerHome() {
 
   return (
     <Screen scroll className="pb-8 pt-2">
-      <Text variant="caption" className="uppercase text-gold">
-        {shop.name}
-      </Text>
+      <Box className="flex-row items-center justify-between">
+        <Text variant="caption" className="uppercase text-gold">
+          {shop.name}
+        </Text>
+        <NotificationCenter />
+      </Box>
 
       {/* Hero — a deep-rose editorial panel (placeholder for Steffi's photo). */}
       <Box className="mt-3 gap-3 rounded-3xl bg-rose p-6">

@@ -201,6 +201,47 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          audience: string
+          body: string
+          booking_id: string | null
+          created_at: string
+          id: string
+          read_at: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          audience: string
+          body: string
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          audience?: string
+          body?: string
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -328,6 +369,19 @@ export type Database = {
       reschedule_guest_booking: {
         Args: { p_id: string; p_date: string; p_time: string }
         Returns: Database["public"]["Tables"]["bookings"]["Row"][]
+      }
+      // Added by migration 009 (notifications) — hand-mirrored; see note above.
+      get_guest_notifications: {
+        Args: { p_booking_ids: string[] }
+        Returns: Database["public"]["Tables"]["notifications"]["Row"][]
+      }
+      mark_guest_notifications_read: {
+        Args: { p_booking_ids: string[] }
+        Returns: undefined
+      }
+      register_guest_push_token: {
+        Args: { p_token: string; p_platform: string }
+        Returns: undefined
       }
     }
     Enums: {
