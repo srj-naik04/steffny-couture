@@ -227,6 +227,15 @@ supabase start
 
 If you don't want to run local Supabase yet, that's fine — just work directly against the cloud project for now. Local Supabase becomes useful when you're testing migrations.
 
+### Auth redirect URLs (needed from Phase 2 onward)
+
+Password reset opens the app via a deep link. In the Supabase dashboard → **Authentication → URL Configuration**, add these to **Redirect URLs**:
+
+- `steffnycouture://reset` — standalone / dev builds
+- `exp://127.0.0.1:8081/--/reset`, plus your LAN variant (e.g. `exp://192.168.x.x:8081/--/reset`) — Expo Go
+
+Without this, Supabase falls back to the Site URL and the recovery link won't return to the app.
+
 ---
 
 ## Part 9 — Open in Claude Code (the moment of truth)

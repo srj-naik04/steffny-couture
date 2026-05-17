@@ -57,9 +57,9 @@
 - **Why:** Booking wizard needs cross-step state that survives unmounts. React Hook Form can't do this elegantly. Zustand is small, simple, persists trivially via MMKV.
 - **Trade-off:** Two state libraries in the app. Boundary is clear: TanStack = server, Zustand = client.
 
-### MMKV over AsyncStorage
-- **Why:** ~10x faster, synchronous, smaller memory footprint. Used for auth session, query cache persistence, Zustand persistence.
-- **Trade-off:** Native module (requires native code) — but works in Expo Go via expo-config-plugin.
+### Client storage: expo-secure-store for the session, MMKV for the rest
+- **Why:** The Supabase auth session is persisted via `expo-secure-store` (encrypted, and — unlike MMKV — it runs in Expo Go, so the demo needs no native build). MMKV remains the intended store for non-auth client state (query-cache persistence, Zustand drafts) for its ~10x speed and synchronous API.
+- **Trade-off:** `react-native-mmkv` v4 is a native module and does **not** run in Expo Go; non-auth MMKV usage will land with the move to a dev build. SecureStore caps values at ~2 KB, so the session adapter (`lib/auth-storage.ts`) chunks large values. See ADR-0005 and ADR-0006.
 
 ### NativeWind over StyleSheet
 - **Why:** Same utility classes as web Tailwind → makes the future web target trivially restylable. Forces consistency by limiting choice. Easier for AI to write well.
@@ -78,6 +78,17 @@
 - `owner` — read-only oversight
 
 See `/docs/DATABASE.md` for policy templates and `.claude/skills/rls-policies/SKILL.md` for the SQL.
+
+## Authentication & Routing (Phase 2)
+
+- **Session:** `@supabase/supabase-js` with `persistSession` and `autoRefreshToken`, backed by the `expo-secure-store` adapter (`lib/auth-storage.ts`). Token refresh is paused while the app is backgrounded (`AppState`).
+- **State:** `AuthProvider` (`features/auth/hooks/use-auth.tsx`) subscribes once to `onAuthStateChange` and fetches the `profiles` row for the signed-in user. Every screen reads `useAuth() → { session, profile, isLoading, isStaff }`.
+- **Routing:** the root layout holds the splash until the first session resolves, then route-group layouts guard:
+  - `(shop)` — redirects non-staff to `/login`.
+  - `(customer)` — public; redirects signed-in staff to `(shop)` so returning staff land on their dashboard. A `__DEV__`-only view switcher can suspend that redirect to preview the customer flow.
+- **Staff vs customer:** `isStaffRole()` mirrors the DB `is_staff()` helper — `tailor | manager | owner | admin` are staff; `customer` is not. (CLAUDE.md's original spec used a single `shop` role; the four-role DB model from Phase 1 is authoritative.)
+- **Password reset:** uses Supabase's built-in auth mailer, independent of the deferred `send-email` Edge Function. The recovery deep link is parsed by hand in `features/auth/api/auth-api.ts` (`completePasswordRecovery`) because the client runs with `detectSessionInUrl: false`.
+- **Guest customers:** the customer flow needs no account. `signUpWithMagicLink` is the auth primitive for the optional Phase 3 "save my details" step.
 
 ## Future Considerations (not yet built)
 - **Payments**: Stripe checkout for deposits. Phase 2.
