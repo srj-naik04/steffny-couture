@@ -4,9 +4,9 @@
 
 ## Where we are
 
-**Last updated:** 2026-05-17 — Phase 7 complete
-**Current phase:** Phase 7 — UI polish ✅ DONE
-**Next milestone:** Phase 8 — Demo preparation
+**Last updated:** 2026-05-17 — Phase 8 complete
+**Current phase:** Phase 8 — Demo preparation ✅ DONE
+**Next milestone:** Phase 9 — Production deployment (after client approval)
 
 ## Status
 
@@ -23,8 +23,8 @@
 - ✅ **Phase 5: Shop dashboard + kanban — DONE**
 - ✅ **Phase 6: Notifications — DONE** (in-app live; push/email source written, deploy deferred)
 - ✅ **Phase 7: Polish — DONE**
-- ⬜ Phase 8: Demo prep (seed, branding, build)
-- ⬜ Phase 9: Production deployment
+- ✅ **Phase 8: Demo prep — DONE**
+- ⬜ Phase 9: Production deployment (after client approval)
 
 ## Phase 0 — what was built
 
@@ -127,6 +127,15 @@
 - **Verified:** `npm run typecheck` clean · `npm run lint` clean · iOS production bundle exports.
 - **Deferred:** offline mutation *queueing* (TanStack Query persistence) — heavier than the phase warrants; the banner conveys offline state. Toast swipe-to-dismiss simplified to tap + auto-dismiss.
 
+## Phase 8 — what was built
+
+- **Branding** — brand SVG source in `assets/branding/` (`icon.svg` rose monogram, `monogram.svg` Android foreground, `splash.svg` logotype) + `scripts/generate-assets.mjs` (sharp) which rasterised `icon.png`, `android-icon-foreground.png`, `splash-icon.png`, `favicon.png`. `app.json` was already fully configured (Phase 0); its `android.adaptiveIcon.backgroundColor` was switched to rose.
+- **Seed** — `scripts/seed.mjs`: connects directly to Postgres (DB password via `SEED_DATABASE_URL`), wipes the bookings table and inserts 15 realistic bookings, walking each through its real status path so history + notifications rebuild. Run successfully against the remote DB ("Seeded 15 bookings"). `npm run seed` / `npm run generate-assets` added.
+- **Demo guide** — `docs/DEMO.md`: prerequisites, a 6-step sub-4-minute walkthrough, reseed instructions, both distribution paths, and an honest "known limitations" note.
+- **EAS** — `eas.json` with `development` / `preview` / `production` build profiles.
+- **Verified:** `npm run typecheck` clean · `npm run lint` clean · iOS production bundle exports · seed executed · brand PNGs generated and visually checked.
+- **Deferred:** an actual EAS build (needs an Expo login); rehearsing the demo timing on a device. Seed bookings carry no photos — the live demo booking shows the photo flow.
+
 ## Open questions / pending decisions
 
 - ✅ GitHub: `main` + `develop` pushed to `https://github.com/srj-naik04/steffny-couture.git`.
@@ -140,6 +149,10 @@
 - ⏳ Confirm: Apple/Google account ownership.
 
 ## Recent changes
+
+### 2026-05-17 — Phase 8
+- Demo prep: brand SVG artwork + a sharp-based generate script (icon, splash, favicon rebuilt); `scripts/seed.mjs` (15-booking demo seed, run against the remote DB); `docs/DEMO.md` walkthrough; `eas.json` build profiles.
+- `app.json` adaptive-icon background switched to rose to match the iOS icon.
 
 ### 2026-05-17 — Phase 7
 - Polish pass: built the Toast system, the offline banner (NetInfo), and `Screen` keyboard avoidance — the three gaps left by the skill-enforced polish of Phases 3–6.
@@ -194,8 +207,11 @@
 
 ## Notes for next session
 
-1. **First action:** `/phase-start 8` — Demo prep (branding assets/icon/splash, `app.json` identifiers, `scripts/seed.ts` with ~15 realistic bookings, demo script, distribution).
-1a. **Edge Function deploy owed:** `send-email` + `send-push` source is written but not deployed — needs the Supabase access token (`supabase functions deploy`) + SMTP secrets, then a `pg_net` trigger to call them on booking insert/status change. Until then status emails/push don't fire; the in-app notification centre does.
+1. **First action:** Phases 0–8 are complete. Phase 9 (production deployment) is gated on client approval — do not start it unprompted.
+2. **Before a real launch (Phase 9 / pre-prod), the credential-gated work owed:**
+   - Deploy `send-email` + `send-push` Edge Functions — needs the Supabase access token (`supabase functions deploy`) + SMTP secrets, then a `pg_net` trigger to call them on booking insert/status change. Until then status emails/push don't fire; the in-app notification centre does.
+   - Regenerate `types/database.ts` with `supabase gen types` once Docker or an access token is available — the migration 007/009 function + `notifications` types are currently hand-mirrored (accurate, but should be generated).
+   - Push notifications need a dev/EAS build (Expo Go no longer issues push tokens).
 2. **Phase 4 guests:** booking ids are stored on-device (`lib/guest-bookings.ts`); guests read/manage bookings via the migration-007 functions. The remembered ids are the only handle a guest has — clearing app data loses the list (acceptable; documented).
 3. **Device verification still owed:** the Phase 3 checks (book end-to-end, photos in Storage, reference match, no data loss) and the Phase 4 checks (list filters, timeline, realtime status update, WhatsApp link) need a physical iPhone. Shop login: `steffi@steffnycouture.co.uk` / `Steffny-Couture-2026`.
 4. Email Edge Function + templates (CLAUDE.md §1.5–1.6) still owed — schedule after the first demo. Once shipped, wire the two `send-email` calls in `useSubmitBooking` (marked TODO) and the customer + internal booking emails fire on submit.
@@ -208,6 +224,7 @@
 
 ## Wins / blockers log
 
+- **2026-05-17 win:** Phase 8 demo prep green — brand artwork generated, 15-booking seed run against the remote DB, demo guide + EAS profiles written; typecheck + lint clean, iOS bundle exports. **Phases 0–8 all complete.**
 - **2026-05-17 win:** Phase 7 polish green — Toast system, offline banner, keyboard avoidance; checklist audited; typecheck + lint clean, iOS bundle exports.
 - **2026-05-17 win:** Phase 6 notifications green — `notifications` table + trigger, in-app notification centre, push registration, 5 email templates + 2 Edge Functions; typecheck + lint clean, iOS bundle exports.
 - **2026-05-17 note:** Edge Function deployment + SMTP deferred (no Supabase access token / SMTP creds in the environment) — in-app notifications work without them.
