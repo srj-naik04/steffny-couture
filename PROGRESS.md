@@ -4,9 +4,9 @@
 
 ## Where we are
 
-**Last updated:** 2026-05-17 — Phase 5 complete
-**Current phase:** Phase 5 — Shop dashboard ✅ DONE
-**Next milestone:** Phase 6 — Notifications
+**Last updated:** 2026-05-17 — Phase 6 complete
+**Current phase:** Phase 6 — Notifications ✅ DONE
+**Next milestone:** Phase 7 — UI polish
 
 ## Status
 
@@ -21,7 +21,7 @@
 - ✅ **Phase 3: Customer booking wizard — DONE**
 - ✅ **Phase 4: My bookings (customer side) — DONE**
 - ✅ **Phase 5: Shop dashboard + kanban — DONE**
-- ⬜ Phase 6: Notifications (email + push)
+- ✅ **Phase 6: Notifications — DONE** (in-app live; push/email source written, deploy deferred)
 - ⬜ Phase 7: Polish (motion, haptics, accessibility)
 - ⬜ Phase 8: Demo prep (seed, branding, build)
 - ⬜ Phase 9: Production deployment
@@ -107,6 +107,17 @@
 - **Verified:** `npm run typecheck` clean · `npm run lint` clean (0 problems) · iOS production bundle exports · migration 008 applied.
 - **Deferred:** status-change emails (the `TODO(phase-1-email)` in `use-update-booking-status.ts`) ride with the Phase 6 email work; alteration-type management does create/edit/active-toggle but not icon-picking or hard delete (active-toggle replaces delete by design). Device verification carried as in Phases 0–4.
 
+## Phase 6 — what was built
+
+- **Migration `009_notifications`** — applied to remote. A `notifications` table; a trigger on `booking_status_history` turns every booking creation (→ shop notification) and status change (→ customer notification) into a notification row — so the in-app centre needs no Edge Function. Plus guest RPCs (`get_guest_notifications`, `mark_guest_notifications_read`, `register_guest_push_token`) keyed on the device's booking ids. Smoke-tested (HTTP 200).
+- **Notifications feature** (`features/notifications/`): audience-aware reads (staff direct via RLS, customer via guest RPC), `useNotifications` (+ Realtime for staff), `useMarkNotificationsRead`, and `registerForPushNotifications`.
+- **`NotificationCenter`** — a bell with an unread badge that opens a sheet; wired into the customer welcome and shop dashboard headers. Opening marks all read. Works end-to-end with no Edge Function.
+- **Push registration** — requested only after the first booking completes (`book/confirmed.tsx`), never on launch.
+- **Email** — 5 react-email templates (`emails/`, shared `BrandLayout`) + the `send-email` Edge Function (Nodemailer); `send-push` Edge Function (Expo Push API); `supabase/functions/deno.json` import map.
+- **Config:** `emails/` and `supabase/functions/` excluded from the RN `tsconfig`/ESLint — they are Deno/server code built by Supabase, not the app.
+- **Verified:** `npm run typecheck` clean · `npm run lint` clean · iOS production bundle exports · migration 009 applied + RPC smoke-tested.
+- **Deferred (credential-gated):** deploying `send-email`/`send-push` (needs the Supabase **access token**), SMTP credentials, the `pg_net` trigger / scheduled-function wiring that calls them, and live push/email verification. The in-app notification path is fully working without any of this.
+
 ## Open questions / pending decisions
 
 - ✅ GitHub: `main` + `develop` pushed to `https://github.com/srj-naik04/steffny-couture.git`.
@@ -120,6 +131,11 @@
 - ⏳ Confirm: Apple/Google account ownership.
 
 ## Recent changes
+
+### 2026-05-17 — Phase 6
+- Built notifications: `notifications` table + status-history trigger, the notifications feature, `NotificationCenter` bell/badge/sheet wired into both apps, push registration after first booking.
+- Wrote the 5 react-email templates + `send-email`/`send-push` Edge Functions — committed as source; deployment deferred (needs the Supabase access token + SMTP creds).
+- Excluded `emails/` and `supabase/functions/` from the RN tsconfig/ESLint (Deno/server code).
 
 ### 2026-05-17 — Phase 5
 - Built the shop dashboard: bottom-tab shell, Today, Bookings (list/kanban/calendar), booking detail, manual booking, customers, settings.
@@ -165,7 +181,8 @@
 
 ## Notes for next session
 
-1. **First action:** `/phase-start 6` — Notifications (Expo push, in-app notification centre, email lifecycle, WhatsApp deep links). This is also where the deferred `send-email` Edge Function + 5 react-email templates (CLAUDE.md §1.5/§1.6) finally land, plus the `TODO(phase-1-email)` call sites in `useSubmitBooking` and `useUpdateBookingStatus`.
+1. **First action:** `/phase-start 7` — UI polish pass (skeletons/empty/error states, motion, copy, accessibility, reduced-motion) across every screen.
+1a. **Edge Function deploy owed:** `send-email` + `send-push` source is written but not deployed — needs the Supabase access token (`supabase functions deploy`) + SMTP secrets, then a `pg_net` trigger to call them on booking insert/status change. Until then status emails/push don't fire; the in-app notification centre does.
 2. **Phase 4 guests:** booking ids are stored on-device (`lib/guest-bookings.ts`); guests read/manage bookings via the migration-007 functions. The remembered ids are the only handle a guest has — clearing app data loses the list (acceptable; documented).
 3. **Device verification still owed:** the Phase 3 checks (book end-to-end, photos in Storage, reference match, no data loss) and the Phase 4 checks (list filters, timeline, realtime status update, WhatsApp link) need a physical iPhone. Shop login: `steffi@steffnycouture.co.uk` / `Steffny-Couture-2026`.
 4. Email Edge Function + templates (CLAUDE.md §1.5–1.6) still owed — schedule after the first demo. Once shipped, wire the two `send-email` calls in `useSubmitBooking` (marked TODO) and the customer + internal booking emails fire on submit.
@@ -178,6 +195,8 @@
 
 ## Wins / blockers log
 
+- **2026-05-17 win:** Phase 6 notifications green — `notifications` table + trigger, in-app notification centre, push registration, 5 email templates + 2 Edge Functions; typecheck + lint clean, iOS bundle exports.
+- **2026-05-17 note:** Edge Function deployment + SMTP deferred (no Supabase access token / SMTP creds in the environment) — in-app notifications work without them.
 - **2026-05-17 win:** Phase 5 shop dashboard green — tab shell, Today, list/kanban/calendar, detail, manual booking, customers, settings; kanban drag-and-drop working; migration 008 applied; typecheck + lint clean, iOS bundle exports.
 - **2026-05-17 win:** Phase 4 "My bookings" green — list/detail/reschedule, guest-access migration 007 applied + smoke-tested, realtime wired; typecheck + lint clean, iOS bundle exports.
 - **2026-05-17 blocker (resolved):** migration 007 push failed — no Supabase access token in the environment; resolved with the DB password (`supabase db push --db-url`). `gen types` still blocked (needs Docker/token) — function types hand-mirrored instead.
