@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { toast } from '@/lib/toast';
+
 import {
   type BookingFields,
   updateBookingFields,
@@ -19,5 +21,8 @@ export function useUpdateBooking() {
       queryClient.setQueryData(bookingKeys.detail(booking.id), booking);
       void queryClient.invalidateQueries({ queryKey: bookingKeys.shopList() });
     },
+    // Field edits save on blur — a success toast each time would be noise, so
+    // only failures speak up.
+    onError: () => toast.error('Couldn’t save — check your connection'),
   });
 }
