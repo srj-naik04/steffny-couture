@@ -18,6 +18,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { queryClient } from '@/lib/query-client';
 
 import { AuthProvider, useAuth } from '@/features/auth';
+import { DevViewSwitcher } from '@/features/auth/components/dev-view-switcher';
 
 // Customer is the public, default experience; staff are routed to the shop
 // group by the guard in app/(shop)/_layout.tsx.
@@ -63,6 +64,7 @@ function RootNavigator() {
         <Stack.Screen name="(shop)" />
         <Stack.Screen name="(auth)" />
       </Stack>
+      <DevViewSwitcher />
       <StatusBar style="dark" />
     </>
   );
