@@ -1,0 +1,47 @@
+# ─── Expo ───────────────────────────────────────────────
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# ─── Node ───────────────────────────────────────────────
+node_modules/
+npm-debug.*
+*.log
+
+# ─── Native builds ──────────────────────────────────────
+android/
+ios/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# ─── Environment / secrets ──────────────────────────────────
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ─── Supabase ───────────────────────────────────────────
+supabase/.branches/
+supabase/.temp/
+
+# ─── Project-specific ───────────────────────────────────
+scripts/fetched-images/
+SCRATCH.md
+
+# ─── OS clutter ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── VS Code (keep shared settings, ignore personal) ────
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# generated script downloads
+scripts/fetched-images/
