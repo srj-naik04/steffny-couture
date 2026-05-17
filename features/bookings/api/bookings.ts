@@ -56,14 +56,30 @@ export function draftToInsert(draft: BookingDraft): BookingInsert {
   };
 }
 
-/** Insert a booking and return the stored row (with its generated reference). */
+/**
+ * Insert a booking and return the stored row (with its generated reference).
+ *
+ * Anonymous guests have an INSERT policy on `bookings` but no SELECT policy —
+ * reads go through the `get_guest_bookings` security-definer RPC (migration
+ * 007). So the insert must not chain `.select()`: RLS would filter the new
+ * row out and `.single()` would fail even though the row committed. Insert
+ * plainly, then read it back by the id generated up front for the draft.
+ */
 export async function createBooking(
   input: BookingInsert,
 ): Promise<BookingRow> {
+  const id = input.id;
+  if (!id) throw new Error('Booking is missing its id.');
+
+  const { error: insertError } = await supabase.from('bookings').insert(input);
+  // 23505 = unique violation: a previous attempt already inserted this row
+  // (the id is client-generated and stable across retries). Treat it as done
+  // and read the row back — this keeps a retried "Confirm booking" idempotent
+  // rather than dead-ending on a duplicate-key error.
+  if (insertError && insertError.code !== '23505') throw insertError;
+
   const { data, error } = await supabase
-    .from('bookings')
-    .insert(input)
-    .select()
+    .rpc('get_guest_bookings', { p_ids: [id] })
     .single();
 
   if (error) throw error;
