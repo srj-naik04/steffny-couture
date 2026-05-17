@@ -1,5 +1,11 @@
 import { type ReactNode } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  RefreshControl,
+  ScrollView,
+  View,
+} from 'react-native';
 import { type Edge, SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors } from '@/constants/brand';
@@ -16,6 +22,8 @@ type Props = {
   onRefresh?: () => void;
   /** Whether a pull-to-refresh is in flight. */
   refreshing?: boolean;
+  /** Lift content above the keyboard — for form screens (CLAUDE.md §7). */
+  keyboardAvoiding?: boolean;
 };
 
 /**
@@ -23,7 +31,8 @@ type Props = {
  * Screens compose this instead of importing `SafeAreaView` directly so the
  * `/app` layer never touches `react-native` (the "no rework for web" rule).
  *
- * Pass `onRefresh` for pull-to-refresh on list screens (CLAUDE.md §7).
+ * Pass `onRefresh` for pull-to-refresh on list screens, and `keyboardAvoiding`
+ * on form screens so the keyboard never covers an input (CLAUDE.md §7).
  */
 export function Screen({
   children,
@@ -32,32 +41,44 @@ export function Screen({
   scroll = false,
   onRefresh,
   refreshing = false,
+  keyboardAvoiding = false,
 }: Props) {
   const content = (
     <View className={`flex-1 px-5 ${className ?? ''}`}>{children}</View>
   );
 
+  const body =
+    scroll || onRefresh ? (
+      <ScrollView
+        contentContainerClassName="flex-grow"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.rose}
+              colors={[colors.rose]}
+            />
+          ) : undefined
+        }>
+        {content}
+      </ScrollView>
+    ) : (
+      content
+    );
+
   return (
     <SafeAreaView edges={edges} className="flex-1 bg-ivory">
-      {scroll || onRefresh ? (
-        <ScrollView
-          contentContainerClassName="flex-grow"
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            onRefresh ? (
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor={colors.rose}
-                colors={[colors.rose]}
-              />
-            ) : undefined
-          }>
-          {content}
-        </ScrollView>
+      {keyboardAvoiding ? (
+        <KeyboardAvoidingView
+          className="flex-1"
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          {body}
+        </KeyboardAvoidingView>
       ) : (
-        content
+        body
       )}
     </SafeAreaView>
   );

@@ -199,6 +199,7 @@ export default function ShopBookingDetail() {
   return (
     <Screen
       scroll
+      keyboardAvoiding
       className="pb-8"
       onRefresh={onRefresh}
       refreshing={booking.isRefetching || history.isRefetching}>

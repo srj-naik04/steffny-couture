@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { toast } from '@/lib/toast';
+
 import {
   createManualBooking,
   type ManualBookingInput,
@@ -15,6 +17,8 @@ export function useCreateManualBooking() {
     mutationFn: createManualBooking,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: bookingKeys.all });
+      toast.success('Booking created');
     },
+    onError: () => toast.error('Couldn’t save the booking'),
   });
 }
