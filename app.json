@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "Steffny Couture",
+    "slug": "steffny-couture",
+    "scheme": "steffnycouture",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FAF7F2"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "uk.co.steffnycouture.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "To photograph your garment for the alteration booking.",
+        "NSPhotoLibraryUsageDescription": "To attach photos of your garment to the booking.",
+        "NSPhotoLibraryAddUsageDescription": "To save photos from your booking."
+      }
+    },
+    "android": {
+      "package": "uk.co.steffnycouture.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#FAF7F2",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "$(PRODUCT_NAME) needs access to your photos to attach garment images to your booking.",
+          "cameraPermission": "$(PRODUCT_NAME) needs access to your camera to photograph your garment."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#7C2D3E"
+        }
+      ],
+      "expo-image",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
