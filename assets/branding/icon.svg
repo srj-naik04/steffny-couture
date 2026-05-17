@@ -1,0 +1,7 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- App icon — Steffny Couture monogram on rose (CLAUDE.md §8). -->
+  <rect width="1024" height="1024" fill="#7C2D3E"/>
+  <circle cx="512" cy="512" r="404" fill="none" stroke="#C9A961" stroke-width="7"/>
+  <text x="512" y="548" font-family="Georgia, 'Times New Roman', serif"
+        font-size="468" font-weight="700" fill="#FAF7F2" text-anchor="middle">SC</text>
+</svg>
