@@ -31,6 +31,8 @@ supabase/.temp/
 
 # ─── Project-specific ───────────────────────────────────
 scripts/fetched-images/
+scripts/_*.mjs
+scripts/_*.ts
 SCRATCH.md
 
 # ─── OS clutter ─────────────────────────────────────────
