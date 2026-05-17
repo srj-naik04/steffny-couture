@@ -17,3 +17,4 @@ export { Skeleton } from '@/components/ui/skeleton';
 export { StatusPill, type BookingStatus } from '@/components/ui/status-pill';
 export { Text } from '@/components/ui/text';
 export { Textarea } from '@/components/ui/textarea';
+export { Toggle } from '@/components/ui/toggle';
