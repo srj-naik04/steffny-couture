@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { rememberGuestBooking } from '@/lib/guest-bookings';
+
 import { signUpWithMagicLink } from '@/features/auth';
 import {
   createBooking,
@@ -29,6 +31,10 @@ export function useSubmitBooking() {
       }
 
       const booking = await createBooking(draftToInsert(draft));
+
+      // Remember the booking on this device so it shows in "My bookings" —
+      // a guest has no session to read it back any other way (migration 007).
+      await rememberGuestBooking(booking.id);
 
       if (draft.saveDetails) {
         try {

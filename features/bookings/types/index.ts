@@ -8,6 +8,8 @@ import { type Database } from '@/types/database';
 
 export type BookingRow = Database['public']['Tables']['bookings']['Row'];
 export type BookingInsert = Database['public']['Tables']['bookings']['Insert'];
+export type BookingStatusHistoryRow =
+  Database['public']['Tables']['booking_status_history']['Row'];
 export type AlterationTypeRow =
   Database['public']['Tables']['alteration_types']['Row'];
 export type ShopSettingsRow =
