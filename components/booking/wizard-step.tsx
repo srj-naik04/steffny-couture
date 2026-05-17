@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { WizardHeader } from '@/components/booking/wizard-header';
@@ -18,27 +18,36 @@ type Props = {
  * Layout shared by every wizard step: a fixed header with the progress bar, a
  * content area, and an optional pinned footer. Keeps the header and primary
  * action in place while the content between them scrolls.
+ *
+ * The content + footer sit inside a `KeyboardAvoidingView` so the footer
+ * action (e.g. "Next") rises above the keyboard instead of hiding behind it
+ * (iOS uses `padding`; Android resizes the window — see AndroidManifest's
+ * `adjustResize`).
  */
 export function WizardStep({ step, children, footer, scroll = true }: Props) {
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-ivory">
       <WizardHeader step={step} />
-      {scroll ? (
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName="px-5 pb-8 pt-3"
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}>
-          {children}
-        </ScrollView>
-      ) : (
-        <View className="flex-1 px-5 pt-3">{children}</View>
-      )}
-      {footer ? (
-        <View className="border-t border-border bg-ivory px-5 pb-2 pt-3">
-          {footer}
-        </View>
-      ) : null}
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        {scroll ? (
+          <ScrollView
+            className="flex-1"
+            contentContainerClassName="px-5 pb-8 pt-3"
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}>
+            {children}
+          </ScrollView>
+        ) : (
+          <View className="flex-1 px-5 pt-3">{children}</View>
+        )}
+        {footer ? (
+          <View className="border-t border-border bg-ivory px-5 pb-2 pt-3">
+            {footer}
+          </View>
+        ) : null}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

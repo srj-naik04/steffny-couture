@@ -22,7 +22,11 @@ type Props = {
   onRefresh?: () => void;
   /** Whether a pull-to-refresh is in flight. */
   refreshing?: boolean;
-  /** Lift content above the keyboard — for form screens (CLAUDE.md §7). */
+  /**
+   * Lift content above the keyboard — on by default so a footer/primary
+   * button never hides behind the keyboard (CLAUDE.md §7). Pass `false` only
+   * for a screen that must not shift (rare).
+   */
   keyboardAvoiding?: boolean;
 };
 
@@ -31,8 +35,8 @@ type Props = {
  * Screens compose this instead of importing `SafeAreaView` directly so the
  * `/app` layer never touches `react-native` (the "no rework for web" rule).
  *
- * Pass `onRefresh` for pull-to-refresh on list screens, and `keyboardAvoiding`
- * on form screens so the keyboard never covers an input (CLAUDE.md §7).
+ * Pass `onRefresh` for pull-to-refresh on list screens. Keyboard avoidance is
+ * on by default — typing never hides a button behind the keyboard.
  */
 export function Screen({
   children,
@@ -41,7 +45,7 @@ export function Screen({
   scroll = false,
   onRefresh,
   refreshing = false,
-  keyboardAvoiding = false,
+  keyboardAvoiding = true,
 }: Props) {
   const content = (
     <View className={`flex-1 px-5 ${className ?? ''}`}>{children}</View>
@@ -74,7 +78,7 @@ export function Screen({
       {keyboardAvoiding ? (
         <KeyboardAvoidingView
           className="flex-1"
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           {body}
         </KeyboardAvoidingView>
       ) : (
