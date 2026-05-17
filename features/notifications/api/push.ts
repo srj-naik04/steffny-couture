@@ -1,4 +1,3 @@
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import { supabase } from '@/lib/supabase';
@@ -6,16 +5,23 @@ import { supabase } from '@/lib/supabase';
 /**
  * Expo push-notification registration (CLAUDE.md §6.1).
  *
+ * `expo-notifications` is imported lazily, not at module scope. Importing it
+ * throws in Expo Go (SDK 53+ removed remote push from Expo Go), and Expo
+ * Router evaluates every route module at startup — a top-level import would
+ * crash the whole app on launch. Deferring it keeps the app running in Expo
+ * Go; push itself only delivers in a development / EAS build.
+ *
  * Called once after a customer's first booking — never on app launch — so the
  * OS permission prompt lands at a moment the request makes sense. The token
  * is stored in `push_tokens`: under the signed-in user when there is one,
  * otherwise through the migration-009 guest function.
  *
- * Every step is best-effort: a simulator (or Expo Go, which no longer issues
- * push tokens) simply makes this a no-op rather than throwing.
+ * Every step is best-effort: Expo Go or a simulator simply makes this a no-op.
  */
 export async function registerForPushNotifications(): Promise<void> {
   try {
+    const Notifications = await import('expo-notifications');
+
     const current = await Notifications.getPermissionsAsync();
     let granted = current.granted;
     if (!granted && current.canAskAgain) {
@@ -43,6 +49,6 @@ export async function registerForPushNotifications(): Promise<void> {
       });
     }
   } catch {
-    // Push is non-essential — a device/runtime without it must never throw.
+    // Push is unavailable in Expo Go and on simulators — never throw.
   }
 }
