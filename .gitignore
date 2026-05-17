@@ -24,6 +24,7 @@ ios/
 .env.local
 .env.*.local
 !.env.example
+CREDENTIALS.md
 
 # ─── Supabase ───────────────────────────────────────────
 supabase/.branches/
