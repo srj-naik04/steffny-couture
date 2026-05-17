@@ -41,6 +41,16 @@ export function formatTime(value: Date | string): string {
   return formatInTimeZone(toDate(value), TIME_ZONE, 'h:mm a', { locale: enGB });
 }
 
+/** "Wed" — short weekday, e.g. for the schedule day strip. */
+export function formatWeekdayShort(value: Date | string): string {
+  return formatInTimeZone(toDate(value), TIME_ZONE, 'EEE', { locale: enGB });
+}
+
+/** "21" — day of the month. */
+export function formatDayOfMonth(value: Date | string): string {
+  return formatInTimeZone(toDate(value), TIME_ZONE, 'd', { locale: enGB });
+}
+
 /** "2:30 PM" — formats a bare "HH:mm" string (e.g. an appointment slot). */
 export function formatTimeLabel(hhmm: string): string {
   const parts = hhmm.split(':');

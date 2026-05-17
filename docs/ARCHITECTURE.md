@@ -57,9 +57,9 @@
 - **Why:** Booking wizard needs cross-step state that survives unmounts. React Hook Form can't do this elegantly. Zustand is small, simple, persists trivially via MMKV.
 - **Trade-off:** Two state libraries in the app. Boundary is clear: TanStack = server, Zustand = client.
 
-### Client storage: expo-secure-store for the session, MMKV for the rest
-- **Why:** The Supabase auth session is persisted via `expo-secure-store` (encrypted, and — unlike MMKV — it runs in Expo Go, so the demo needs no native build). MMKV remains the intended store for non-auth client state (query-cache persistence, Zustand drafts) for its ~10x speed and synchronous API.
-- **Trade-off:** `react-native-mmkv` v4 is a native module and does **not** run in Expo Go; non-auth MMKV usage will land with the move to a dev build. SecureStore caps values at ~2 KB, so the session adapter (`lib/auth-storage.ts`) chunks large values. See ADR-0005 and ADR-0006.
+### Client storage: Expo Go-safe stores, MMKV deferred
+- **Why:** Everything that must persist runs on Expo Go so the Phase 8 demo needs no native build. The auth session uses an `expo-secure-store` adapter (`lib/auth-storage.ts`, encrypted, chunked past the ~2 KB cap). The booking-wizard draft uses an `expo-file-system` adapter (`lib/draft-storage.ts`).
+- **Trade-off:** `react-native-mmkv` v4 is a native module and does **not** run in Expo Go, so it is unused at runtime despite being installed — its ~10x-faster synchronous API would only land with a move to a dev build (e.g. query-cache persistence). See ADR-0005, ADR-0006 and ADR-0007.
 
 ### NativeWind over StyleSheet
 - **Why:** Same utility classes as web Tailwind → makes the future web target trivially restylable. Forces consistency by limiting choice. Easier for AI to write well.
@@ -89,6 +89,18 @@ See `/docs/DATABASE.md` for policy templates and `.claude/skills/rls-policies/SK
 - **Staff vs customer:** `isStaffRole()` mirrors the DB `is_staff()` helper — `tailor | manager | owner | admin` are staff; `customer` is not. (CLAUDE.md's original spec used a single `shop` role; the four-role DB model from Phase 1 is authoritative.)
 - **Password reset:** uses Supabase's built-in auth mailer, independent of the deferred `send-email` Edge Function. The recovery deep link is parsed by hand in `features/auth/api/auth-api.ts` (`completePasswordRecovery`) because the client runs with `detectSessionInUrl: false`.
 - **Guest customers:** the customer flow needs no account. `signUpWithMagicLink` is the auth primitive for the optional Phase 3 "save my details" step.
+
+## Booking Wizard (Phase 3)
+
+The customer booking flow is a six-step wizard (`app/(customer)/book/`) presented as a modal over the welcome screen.
+
+- **Draft state:** one Zustand store (`features/bookings/store.ts`) holds the whole draft across steps, persisted to disk through a file-system adapter so it survives backgrounding, force-quit and a crash (ADR-0007). It resets only on a successful submission or an explicit discard — never on step navigation.
+- **Validation:** one Zod schema per step (`features/bookings/schemas`). Form-heavy steps (details, contact) use React Hook Form with the step schema; the others gate "Next" on the store directly.
+- **Photos:** each photo uploads to `booking-photos/bookings/<id>/` as it is picked. The booking id is generated client-side (`expo-crypto`) up front so photos reach their final storage folder before the row exists — storage RLS only checks the path prefix (migration 004).
+- **Scheduling:** slot times are derived from `shop_settings` opening hours and slot duration; booked slots are queried per date and greyed out.
+- **Submission:** `useSubmitBooking` re-checks the slot, inserts the booking, and — if the guest opted in — starts a magic-link account. The confirmed screen reads the new reference from route params; the draft is reset before navigating.
+- **Server state:** TanStack Query owns alteration types, shop settings and booked slots; the draft store is the only client state.
+- **Deferred:** the booking-confirmation and internal-alert emails wait on the `send-email` Edge Function deferred in Phase 1 — a marked TODO sits in `useSubmitBooking`.
 
 ## Future Considerations (not yet built)
 - **Payments**: Stripe checkout for deposits. Phase 2.
