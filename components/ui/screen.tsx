@@ -1,11 +1,6 @@
 import { type ReactNode } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  RefreshControl,
-  ScrollView,
-  View,
-} from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { type Edge, SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors } from '@/constants/brand';
@@ -76,9 +71,7 @@ export function Screen({
   return (
     <SafeAreaView edges={edges} className="flex-1 bg-ivory">
       {keyboardAvoiding ? (
-        <KeyboardAvoidingView
-          className="flex-1"
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
           {body}
         </KeyboardAvoidingView>
       ) : (
