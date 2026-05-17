@@ -4,9 +4,9 @@
 
 ## Where we are
 
-**Last updated:** 2026-05-17 — Phase 2 complete
-**Current phase:** Phase 2 — Authentication ✅ DONE
-**Next milestone:** Phase 3 — Customer booking wizard
+**Last updated:** 2026-05-17 — Phase 3 complete
+**Current phase:** Phase 3 — Customer booking wizard ✅ DONE
+**Next milestone:** Phase 4 — Customer "My bookings"
 
 ## Status
 
@@ -18,7 +18,7 @@
 - ✅ **Phase 0: Foundation — DONE**
 - ✅ **Phase 1: Database, Storage, Seed — DONE** (email Edge Function + templates deferred to post-demo)
 - ✅ **Phase 2: Authentication — DONE**
-- ⬜ Phase 3: Customer booking wizard
+- ✅ **Phase 3: Customer booking wizard — DONE**
 - ⬜ Phase 4: My bookings (customer side)
 - ⬜ Phase 5: Shop dashboard + kanban
 - ⬜ Phase 6: Notifications (email + push)
@@ -70,11 +70,24 @@
 - **Deferred:** device verification of the four acceptance criteria (login routing, customer default, session-survives-restart, reset round-trip) — needs a physical device plus the Supabase redirect-URL config (below). Consistent with how Phase 0/1 handled hardware-dependent checks.
 - **Note:** password-reset emails use Supabase's built-in auth mailer — they do **not** depend on the deferred `send-email` Edge Function.
 
+## Phase 3 — what was built
+
+- **Bookings feature** (`features/bookings/`): a Zustand draft store persisted to disk (`lib/draft-storage.ts`, file-system adapter — ADR-0007); per-step Zod schemas; pure slot logic; TanStack Query API + hooks for alteration types, shop settings and booked slots; `useSubmitBooking`.
+- **UI primitives:** `ProgressBar`, `Sheet` (bottom sheet — replaces `Alert.alert`), `Chip`, `Textarea`, `Select`, `Toggle`.
+- **The six-step wizard** (`app/(customer)/book/`, a modal over the welcome screen): type · photos · details · schedule · contact · review, plus the terminal `confirmed` screen. Shared `WizardHeader` (progress bar + discard sheet) and `WizardStep` layout.
+- **Welcome screen** (`app/(customer)/index.tsx`): hero panel, primary/secondary CTAs, maps/phone/Instagram pills, an opening-hours card, and a "Continue your booking" resume card.
+- **Photos:** captured + compressed (`expo-image-manipulator`) + uploaded to `booking-photos/bookings/<id>/` as picked; the booking id is generated client-side (`expo-crypto`) so uploads land before the row exists.
+- **Submission:** re-checks the slot, inserts the booking as a guest row, optionally starts a magic-link account; the confirmed screen shows the generated reference plus WhatsApp / add-to-calendar CTAs.
+- **Verified:** `npm run typecheck` clean · `npm run lint` clean · iOS production bundle exports.
+- **Deferred:** the `booking_confirmation` + `internal_alert` emails on submit — they wait on the Phase 1 `send-email` Edge Function (marked TODO in `useSubmitBooking`). Device verification of the acceptance criteria is also pending a physical iPhone, consistent with Phase 0–2.
+- **New deps:** `expo-image-manipulator`, `expo-calendar`, `expo-crypto`.
+- **Deviations:** draft persistence uses a file-system adapter, not the booking-wizard skill's mandated MMKV (ADR-0007); a minimal `(customer)/bookings/` placeholder was added so the welcome screen's "My bookings" CTA doesn't dead-end (the real screen is Phase 4).
+
 ## Open questions / pending decisions
 
 - ✅ GitHub: `main` + `develop` pushed to `https://github.com/srj-naik04/steffny-couture.git`.
 - ✅ Supabase: 4-role model (customer/tailor/manager/owner + admin) chosen over CLAUDE.md's 3-role. Use the **legacy JWT anon key** (in `.env.local`); the `sb_publishable_` key errors on this project. Expo app — Supabase's Next.js quickstart (`@supabase/ssr`) does not apply.
-- ✅ Session persistence: `expo-secure-store` chosen over MMKV (MMKV breaks the Expo Go demo). Chunked adapter in `lib/auth-storage.ts`. See ADR-0006. The broader MMKV-vs-Expo-Go question for non-auth client storage (Zustand drafts, query cache) is still open for Phase 3 / Phase 7.
+- ✅ Session persistence: `expo-secure-store` chosen over MMKV (MMKV breaks the Expo Go demo). Chunked adapter in `lib/auth-storage.ts`. See ADR-0006. The wizard draft now uses a file-system adapter (`lib/draft-storage.ts`, ADR-0007); `react-native-mmkv` stays unused at runtime — dev-build query-cache persistence is its only remaining possible use.
 - ⏳ Supabase Auth → URL Configuration: add the password-reset redirect URLs (`steffnycouture://reset` + the `exp://…/--/reset` variants) before testing reset on a device. See docs/SETUP.md Part 8.
 - ⏳ SMTP credentials needed when email work resumes post-demo (a Gmail app password on a dedicated test account for dev).
 - ⏳ Email Edge Function (post-demo) needs the service-role key + legacy JWT secret set as Supabase function secrets (`supabase secrets set`) — never committed.
@@ -83,6 +96,13 @@
 - ⏳ Confirm: Apple/Google account ownership.
 
 ## Recent changes
+
+### 2026-05-17 — Phase 3
+- Built the customer booking wizard: the 6-step flow, the welcome screen, the bookings feature module, and 6 new UI primitives.
+- Chose a file-system draft-persistence adapter over the booking-wizard skill's mandated MMKV — MMKV breaks the Expo Go demo (ADR-0007, refining ADR-0005/0006).
+- Photos upload to their final `bookings/<id>/` storage folder before the booking row exists; the booking id is generated client-side so no later move is needed (storage RLS only checks the path prefix).
+- Confirmation emails on submit deferred with the Phase 1 `send-email` work — marked TODO in `useSubmitBooking`.
+- Added a minimal `(customer)/bookings/` placeholder; the real list/detail is Phase 4.
 
 ### 2026-05-17 — Phase 2
 - Built authentication: session persistence, auth feature module, role-based routing, sign-in + password-reset screens.
@@ -109,12 +129,12 @@
 
 ## Notes for next session
 
-1. **First action:** merge `feat/phase-2-auth` → `develop`, then `/phase-start 3`.
-2. **Before testing auth on a device:** add the password-reset redirect URLs in Supabase → Authentication → URL Configuration (see docs/SETUP.md Part 8), then run the four Phase 2 acceptance checks on a physical iPhone.
-3. Shop login for testing: `steffi@steffnycouture.co.uk` / temp password `Steffny-Couture-2026` (role `manager`).
-4. Phase 3 (Customer booking wizard): the 6-step flow. `signUpWithMagicLink` (in `features/auth`) is the primitive for the optional Step 5/6 "save my details" account creation.
+1. **First action:** merge `feat/phase-3-booking-wizard` → `develop`, then `/phase-start 4`.
+2. Phase 4 (Customer "My bookings"): replace the `(customer)/bookings/index.tsx` placeholder with the real list + `[id]` detail. Query bookings by `customer_id` or a locally-stored guest email — persist the guest's email on submission so guests can see their bookings (the wizard already collects it; store it the same Expo Go-safe way as the draft).
+3. **Device verification still owed:** the four Phase 3 acceptance checks (book end-to-end, photos in Storage, reference match, no data loss on back-navigation) need a physical iPhone. Shop login for the shop side: `steffi@steffnycouture.co.uk` / `Steffny-Couture-2026`.
+4. Email Edge Function + templates (CLAUDE.md §1.5–1.6) still owed — schedule after the first demo. Once shipped, wire the two `send-email` calls in `useSubmitBooking` (marked TODO) and the customer + internal booking emails fire on submit.
 5. After any future migration, regenerate types: `npx supabase gen types typescript --linked > types/database.ts`.
-6. Email Edge Function + templates (CLAUDE.md §1.5–1.6) are still owed — schedule after the first client demo.
+6. `react-native-mmkv` is installed but unused at runtime (ADR-0007) — safe to remove, or keep for dev-build query-cache persistence.
 
 ## Demo notes (after live demos)
 
@@ -122,6 +142,7 @@
 
 ## Wins / blockers log
 
+- **2026-05-17 win:** Phase 3 booking wizard green — 6-step flow, welcome screen, file-system draft persistence, background photo upload, guest submission; typecheck + lint clean, iOS bundle exports.
 - **2026-05-17 win:** Phase 2 auth green — chunked secure-store session persistence, role-based route guards, sign-in + password-reset screens; typecheck + lint clean, iOS bundle exports.
 - **2026-05-17 win:** Phase 1 backend green — 6 migrations applied to remote, RLS smoke test 9/9, typecheck + lint clean.
 - **2026-05-17 blocker (resolved):** API roles got "permission denied" — raw-SQL tables skip Supabase's default privileges; fixed with `006_grants.sql`.

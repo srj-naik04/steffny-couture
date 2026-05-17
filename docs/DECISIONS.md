@@ -142,4 +142,25 @@ A running log of significant decisions, ADR-style. Append; never edit old entrie
 
 ---
 
+## ADR-0007: Persist the booking-wizard draft on the file system, not MMKV
+**Date:** 2026-05-17
+**Status:** Accepted (refines ADR-0005)
+
+**Context:** Phase 3's booking wizard holds its draft in a Zustand store that must survive backgrounding, force-quit and a mid-flow crash (booking-wizard skill). ADR-0005 nominated MMKV for "Zustand drafts", and the booking-wizard skill codes the store against MMKV. ADR-0006 already established that `react-native-mmkv` v4 is a native module that does **not** run in Expo Go — the Phase 8 demo path — and left the non-auth storage question open for Phase 3.
+
+**Decision:** Persist the wizard draft with a small `expo-file-system`-backed JSON adapter (`lib/draft-storage.ts`), wired into Zustand's `persist` middleware. `expo-file-system` is bundled with Expo Go, so the draft survives across launches on the demo path with no native build.
+
+**Alternatives considered:**
+- **react-native-mmkv** — the skill's coded choice and ADR-0005's intent. Rejected for the same reason as the session in ADR-0006: it breaks the Expo Go demo.
+- **expo-secure-store** — runs in Expo Go but caps a value at ~2 KB; a draft with several photo URIs and a long description overflows that, and the draft is not sensitive enough to need encryption.
+- **AsyncStorage** — Expo Go-compatible, but explicitly forbidden by CLAUDE.md §1.
+- **No persistence (in-memory store)** — simplest, but loses the draft on force-quit / crash, which the booking-wizard skill explicitly calls out as a must-handle case.
+
+**Consequences:**
+- The whole wizard runs on Expo Go (auth session via ADR-0006, draft here) — Phase 8 needs no native build.
+- File-system reads/writes are async; the store carries a `hydrated` flag and the welcome screen waits for it before offering "Continue your booking".
+- MMKV is now unused at runtime despite being an installed dependency. It can be removed, or kept for the eventual dev-build query-cache persistence. ADR-0005's "MMKV for Zustand drafts" is superseded by this entry.
+
+---
+
 (Add new ADRs below this line as decisions are made.)
