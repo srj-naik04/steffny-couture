@@ -7,6 +7,7 @@ export {
   sendPasswordReset,
   updatePassword,
   signUpWithMagicLink,
+  completePasswordRecovery,
 } from '@/features/auth/api/auth-api';
 export {
   signInSchema,

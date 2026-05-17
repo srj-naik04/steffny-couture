@@ -11,7 +11,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -32,16 +32,25 @@ SplashScreen.preventAutoHideAsync();
 
 /**
  * Renders the navigator once auth has resolved. Lives inside `AuthProvider`
- * so it can read `useAuth()`; keeps the splash up until the session is known.
+ * so it can read `useAuth()`; keeps the splash up until the first session
+ * lookup completes.
+ *
+ * The `booted` latch only gates the *initial* load — once the app has
+ * rendered, later auth changes (a sign-in's profile fetch flips `isLoading`
+ * again) must not blank the screen. Guards react to the new state instead.
  */
 function RootNavigator() {
   const { isLoading } = useAuth();
+  const [booted, setBooted] = useState(false);
 
   useEffect(() => {
-    if (!isLoading) SplashScreen.hideAsync();
-  }, [isLoading]);
+    if (!isLoading && !booted) {
+      setBooted(true);
+      SplashScreen.hideAsync();
+    }
+  }, [isLoading, booted]);
 
-  if (isLoading) return null;
+  if (!booted) return null;
 
   return (
     <>

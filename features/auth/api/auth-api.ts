@@ -49,6 +49,66 @@ export function getResetRedirectUrl(): string {
   return Linking.createURL('reset');
 }
 
+/** Parse an `a=1&b=2` fragment string into a flat, URL-decoded record. */
+function parseFragment(fragment: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const pair of fragment.split('&')) {
+    if (!pair) continue;
+    const eq = pair.indexOf('=');
+    const key = eq === -1 ? pair : pair.slice(0, eq);
+    const raw = eq === -1 ? '' : pair.slice(eq + 1);
+    out[decodeURIComponent(key)] = decodeURIComponent(raw.replace(/\+/g, ' '));
+  }
+  return out;
+}
+
+/**
+ * Establish a session from a password-recovery deep link.
+ *
+ * The client runs with `detectSessionInUrl: false` (it's a native app), so
+ * the recovery URL is parsed here by hand. Handles both the implicit flow
+ * (tokens in the URL fragment) and the PKCE flow (an auth code in the query).
+ *
+ * Returns `'recovery'` once a session is established, `'none'` when the URL
+ * carries no recovery payload, or throws friendly copy for an expired link.
+ */
+export async function completePasswordRecovery(
+  url: string,
+): Promise<'recovery' | 'none'> {
+  const hashIndex = url.indexOf('#');
+  const fragment =
+    hashIndex === -1 ? {} : parseFragment(url.slice(hashIndex + 1));
+
+  // An expired or already-used link returns an error payload, not tokens.
+  if (fragment.error || fragment.error_code) {
+    if (fragment.error_code === 'otp_expired') {
+      throw new Error('This reset link has expired. Request a new one below.');
+    }
+    throw new Error('This reset link is no longer valid. Request a new one below.');
+  }
+
+  // Implicit flow — tokens travel in the URL fragment.
+  if (fragment.type === 'recovery' && fragment.access_token && fragment.refresh_token) {
+    const { error } = await supabase.auth.setSession({
+      access_token: fragment.access_token,
+      refresh_token: fragment.refresh_token,
+    });
+    if (error) throw translateAuthError(error);
+    return 'recovery';
+  }
+
+  // PKCE flow — an auth code travels in the query string.
+  const { queryParams } = Linking.parse(url);
+  const code = typeof queryParams?.code === 'string' ? queryParams.code : null;
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) throw translateAuthError(error);
+    return 'recovery';
+  }
+
+  return 'none';
+}
+
 /** Sign a shop user in with email + password. */
 export async function signIn(values: SignInValues): Promise<void> {
   const { error } = await supabase.auth.signInWithPassword(values);
