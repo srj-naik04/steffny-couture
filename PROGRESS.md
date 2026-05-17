@@ -4,9 +4,9 @@
 
 ## Where we are
 
-**Last updated:** 2026-05-17 — Phase 1 complete (email deferred)
-**Current phase:** Phase 1 — Database, Storage, Seed ✅ DONE (email post-demo)
-**Next milestone:** Phase 2 — Authentication
+**Last updated:** 2026-05-17 — Phase 2 complete
+**Current phase:** Phase 2 — Authentication ✅ DONE
+**Next milestone:** Phase 3 — Customer booking wizard
 
 ## Status
 
@@ -17,7 +17,7 @@
 - ✅ Settings: `.claude/settings.json` configured
 - ✅ **Phase 0: Foundation — DONE**
 - ✅ **Phase 1: Database, Storage, Seed — DONE** (email Edge Function + templates deferred to post-demo)
-- ⬜ Phase 2: Auth
+- ✅ **Phase 2: Authentication — DONE**
 - ⬜ Phase 3: Customer booking wizard
 - ⬜ Phase 4: My bookings (customer side)
 - ⬜ Phase 5: Shop dashboard + kanban
@@ -54,11 +54,28 @@
 - Verified: booking insert + status change auto-log history; RLS smoke test 9/9 passed
 - **Deferred to post-demo:** `send-email` Edge Function (§1.5) + 5 react-email templates (§1.6)
 
+## Phase 2 — what was built
+
+- **Session persistence:** `lib/auth-storage.ts` — a chunked `expo-secure-store` adapter (Supabase sessions exceed SecureStore's ~2 KB limit). `lib/supabase.ts` now runs with `persistSession` + `autoRefreshToken`; refresh pauses on app background via `AppState`.
+- **Auth feature** (`features/auth/`):
+  - `schemas/` — Zod schemas for sign-in, reset request, new password
+  - `api/auth-api.ts` — `signIn` / `signOut` / `sendPasswordReset` / `updatePassword` / `signUpWithMagicLink` / `completePasswordRecovery`; raw `AuthError`s translated to brand-voice copy
+  - `hooks/use-auth.tsx` — `AuthProvider` + `useAuth() → { session, profile, isLoading, isStaff }`
+  - `hooks/use-view-override.ts` — dev-only flag backing the view switcher
+  - `types/` — `Profile`, `UserRole`, `isStaffRole()` (mirrors the DB `is_staff()`)
+  - `components/dev-view-switcher.tsx` — `__DEV__`-only floating control to preview the customer flow
+- **Routing:** root `_layout.tsx` wraps the app in `AuthProvider` and holds the splash until the first session resolves; `(shop)/_layout.tsx` redirects non-staff to `/login`; `(customer)/_layout.tsx` redirects signed-in staff into the shop group.
+- **Screens:** `(auth)/login.tsx` (email + password sign-in, RHF + Zod) and `(auth)/reset.tsx` (request a recovery email / set a new password via the deep link). Shop dashboard placeholder gained a temporary sign-out button.
+- **Verified:** `npm run typecheck` clean · `npm run lint` clean · iOS production bundle exports.
+- **Deferred:** device verification of the four acceptance criteria (login routing, customer default, session-survives-restart, reset round-trip) — needs a physical device plus the Supabase redirect-URL config (below). Consistent with how Phase 0/1 handled hardware-dependent checks.
+- **Note:** password-reset emails use Supabase's built-in auth mailer — they do **not** depend on the deferred `send-email` Edge Function.
+
 ## Open questions / pending decisions
 
 - ✅ GitHub: `main` + `develop` pushed to `https://github.com/srj-naik04/steffny-couture.git`.
 - ✅ Supabase: 4-role model (customer/tailor/manager/owner + admin) chosen over CLAUDE.md's 3-role. Use the **legacy JWT anon key** (in `.env.local`); the `sb_publishable_` key errors on this project. Expo app — Supabase's Next.js quickstart (`@supabase/ssr`) does not apply.
-- ⏳ MMKV (`react-native-mmkv` v4) is a native module — does NOT run in Expo Go. Phase 2 (session persistence) will either use `expo-secure-store` (Expo Go friendly) or move the demo to a development build. Decide before Phase 2.
+- ✅ Session persistence: `expo-secure-store` chosen over MMKV (MMKV breaks the Expo Go demo). Chunked adapter in `lib/auth-storage.ts`. See ADR-0006. The broader MMKV-vs-Expo-Go question for non-auth client storage (Zustand drafts, query cache) is still open for Phase 3 / Phase 7.
+- ⏳ Supabase Auth → URL Configuration: add the password-reset redirect URLs (`steffnycouture://reset` + the `exp://…/--/reset` variants) before testing reset on a device. See docs/SETUP.md Part 8.
 - ⏳ SMTP credentials needed when email work resumes post-demo (a Gmail app password on a dedicated test account for dev).
 - ⏳ Email Edge Function (post-demo) needs the service-role key + legacy JWT secret set as Supabase function secrets (`supabase secrets set`) — never committed.
 - ⏳ Confirm with Bunty: who uses the app day-to-day (role design for Phase 2).
@@ -66,6 +83,13 @@
 - ⏳ Confirm: Apple/Google account ownership.
 
 ## Recent changes
+
+### 2026-05-17 — Phase 2
+- Built authentication: session persistence, auth feature module, role-based routing, sign-in + password-reset screens.
+- Chose `expo-secure-store` over CLAUDE.md's mandated MMKV for the session — MMKV is a native module that breaks the Expo Go demo path (ADR-0006). Wrote a chunking adapter since a Supabase session overflows SecureStore's ~2 KB limit.
+- Followed the Phase 1 four-role model (`customer/tailor/manager/owner` + `admin`) over CLAUDE.md's single `shop` role — `isStaffRole()` mirrors the DB `is_staff()` helper.
+- Role routing implemented via route-group guards (Expo Router v4 idiom) with `AuthProvider` in the root layout, rather than literally branching the group inside root `_layout.tsx`.
+- Password reset uses Supabase's built-in auth mailer; the recovery deep link is parsed by hand because the client runs with `detectSessionInUrl: false`.
 
 ### 2026-05-17 — Phase 1
 - Built database, RLS, storage and seed data; email work explicitly deferred to post-demo.
@@ -85,10 +109,10 @@
 
 ## Notes for next session
 
-1. **First action:** merge `feat/phase-1-database` → `develop`, then `/phase-start 2`.
-2. Phase 2 (Authentication): login screen, password reset, `useAuth()` hook, role-based routing in root `_layout.tsx`, guest-booking support, session persistence.
-3. **Decide first:** MMKV-vs-Expo-Go for session persistence — recommend `expo-secure-store` so the demo stays on Expo Go.
-4. Shop login for testing: `steffi@steffnycouture.co.uk` / temp password `Steffny-Couture-2026` (role `manager`).
+1. **First action:** merge `feat/phase-2-auth` → `develop`, then `/phase-start 3`.
+2. **Before testing auth on a device:** add the password-reset redirect URLs in Supabase → Authentication → URL Configuration (see docs/SETUP.md Part 8), then run the four Phase 2 acceptance checks on a physical iPhone.
+3. Shop login for testing: `steffi@steffnycouture.co.uk` / temp password `Steffny-Couture-2026` (role `manager`).
+4. Phase 3 (Customer booking wizard): the 6-step flow. `signUpWithMagicLink` (in `features/auth`) is the primitive for the optional Step 5/6 "save my details" account creation.
 5. After any future migration, regenerate types: `npx supabase gen types typescript --linked > types/database.ts`.
 6. Email Edge Function + templates (CLAUDE.md §1.5–1.6) are still owed — schedule after the first client demo.
 
@@ -98,6 +122,7 @@
 
 ## Wins / blockers log
 
+- **2026-05-17 win:** Phase 2 auth green — chunked secure-store session persistence, role-based route guards, sign-in + password-reset screens; typecheck + lint clean, iOS bundle exports.
 - **2026-05-17 win:** Phase 1 backend green — 6 migrations applied to remote, RLS smoke test 9/9, typecheck + lint clean.
 - **2026-05-17 blocker (resolved):** API roles got "permission denied" — raw-SQL tables skip Supabase's default privileges; fixed with `006_grants.sql`.
 - **2026-05-17 win:** Phase 0 foundation green — typecheck, lint, expo-doctor, and a real iOS bundle export all pass.

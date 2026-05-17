@@ -121,4 +121,25 @@ A running log of significant decisions, ADR-style. Append; never edit old entrie
 
 ---
 
+## ADR-0006: Persist the auth session in expo-secure-store, not MMKV
+**Date:** 2026-05-17
+**Status:** Accepted (refines ADR-0005)
+
+**Context:** Phase 2 needs the Supabase auth session to survive app restarts. ADR-0005 chose `react-native-mmkv` for client storage and claimed it "works in Expo Go via the existing config plugin." That is not correct for `react-native-mmkv` v4 — it is a native module that requires the New Architecture and does **not** run in Expo Go. Phase 8's primary demo path is Expo Go, so an MMKV-backed session would force every demo onto a TestFlight / dev build.
+
+**Decision:** Persist the Supabase auth session via `expo-secure-store`. A custom storage adapter (`lib/auth-storage.ts`) implements Supabase's `getItem` / `setItem` / `removeItem`. SecureStore caps a single value at ~2 KB and a full Supabase session exceeds that, so the adapter transparently chunks values across multiple keys.
+
+**Alternatives considered:**
+- **react-native-mmkv** — the ADR-0005 choice. Rejected for the session: it breaks the Expo Go demo. May still be revisited for non-auth client storage (Zustand drafts, query-cache persistence) once the project moves to a dev build — that broader question is left open for Phase 3 / Phase 7.
+- **AsyncStorage** — Expo Go-compatible with no size limit, but explicitly forbidden by CLAUDE.md §1.
+- **Plain (unchunked) SecureStore adapter** — simplest, but a real session overflows the ~2 KB limit and writes fail on some platforms.
+
+**Consequences:**
+- The auth session is encrypted at rest in the OS keychain / keystore.
+- The demo stays on Expo Go through Phase 8 — no native build needed for auth.
+- The chunking adapter is more code than a one-line MMKV wrapper, and an N-chunk value costs N keychain round-trips (negligible — sessions are a few KB).
+- ADR-0005 still stands for non-auth client storage in principle, but its "works in Expo Go" claim is incorrect and is corrected here.
+
+---
+
 (Add new ADRs below this line as decisions are made.)
