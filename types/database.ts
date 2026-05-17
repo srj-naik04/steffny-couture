@@ -308,6 +308,27 @@ export type Database = {
       current_user_role: { Args: never; Returns: string }
       is_manager: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
+      // Migration 007 (guest booking access) — applied to the remote DB.
+      // These four entries are hand-mirrored from the migration's SQL
+      // signatures (gen-types needs Docker or an access token, neither
+      // available here). Replace with a real run when one is:
+      //   npx supabase gen types typescript --linked > types/database.ts
+      cancel_guest_booking: {
+        Args: { p_id: string }
+        Returns: Database["public"]["Tables"]["bookings"]["Row"][]
+      }
+      get_guest_booking_history: {
+        Args: { p_id: string }
+        Returns: Database["public"]["Tables"]["booking_status_history"]["Row"][]
+      }
+      get_guest_bookings: {
+        Args: { p_ids: string[] }
+        Returns: Database["public"]["Tables"]["bookings"]["Row"][]
+      }
+      reschedule_guest_booking: {
+        Args: { p_id: string; p_date: string; p_time: string }
+        Returns: Database["public"]["Tables"]["bookings"]["Row"][]
+      }
     }
     Enums: {
       [_ in never]: never

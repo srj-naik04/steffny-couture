@@ -4,9 +4,9 @@
 
 ## Where we are
 
-**Last updated:** 2026-05-17 — Phase 3 complete
-**Current phase:** Phase 3 — Customer booking wizard ✅ DONE
-**Next milestone:** Phase 4 — Customer "My bookings"
+**Last updated:** 2026-05-17 — Phase 4 complete
+**Current phase:** Phase 4 — Customer "My bookings" ✅ DONE
+**Next milestone:** Phase 5 — Shop dashboard + kanban
 
 ## Status
 
@@ -19,7 +19,7 @@
 - ✅ **Phase 1: Database, Storage, Seed — DONE** (email Edge Function + templates deferred to post-demo)
 - ✅ **Phase 2: Authentication — DONE**
 - ✅ **Phase 3: Customer booking wizard — DONE**
-- ⬜ Phase 4: My bookings (customer side)
+- ✅ **Phase 4: My bookings (customer side) — DONE**
 - ⬜ Phase 5: Shop dashboard + kanban
 - ⬜ Phase 6: Notifications (email + push)
 - ⬜ Phase 7: Polish (motion, haptics, accessibility)
@@ -83,6 +83,17 @@
 - **New deps:** `expo-image-manipulator`, `expo-calendar`, `expo-crypto`.
 - **Deviations:** draft persistence uses a file-system adapter, not the booking-wizard skill's mandated MMKV (ADR-0007); a minimal `(customer)/bookings/` placeholder was added so the welcome screen's "My bookings" CTA doesn't dead-end (the real screen is Phase 4).
 
+## Phase 4 — what was built
+
+- **Migration `007_guest_booking_access`** — applied to remote `dugooqvhxgzfdrowwnck`. Four `security definer` functions (`get_guest_bookings`, `get_guest_booking_history`, `cancel_guest_booking`, `reschedule_guest_booking`) keyed on the unguessable booking UUID as a capability token, so a guest with no auth session can still read/manage their own bookings (the Phase 1 RLS makes booking reads authenticated-only). Plus an anon storage SELECT policy on `booking-photos` (the booking id is in every photo path, so reading one already proves the caller holds it). Smoke-tested: anon `get_guest_bookings` → HTTP 200.
+- **Guest-access model** — chosen over relaxing RLS to an email-keyed anon policy (email is guessable) — see the AskUserQuestion decision. Booking ids are remembered on-device in `lib/guest-bookings.ts` (file-system store, same Expo Go-safe pattern as the wizard draft).
+- **Customer-bookings layer** (`features/bookings/`): `api/customer-bookings.ts` (list/detail/history/cancel/reschedule + private-bucket signed photo URLs), six hooks (`useMyBookings`, `useBooking` with a Realtime channel, `useBookingHistory`, `useBookingPhotos`, `useCancelBooking`, `useRescheduleBooking`), `status.ts` (active/past + lifecycle helpers), new query keys.
+- **Screens** (`app/(customer)/bookings/`): real `index.tsx` (Active/Past sections, skeletons, error + empty states, pull-to-refresh), `[id]/index.tsx` (status hero, appointment, photo gallery, live timeline, pricing, WhatsApp/Call/Reschedule/Cancel), `[id]/reschedule.tsx` (modal reusing the wizard's day strip + calendar + slot logic), nested `_layout.tsx`.
+- **Components:** `BookingCard`, `StatusTimeline`, `PhotoViewer` (full-screen pinch-zoom gallery), `BookingPhotos`, `FadeInView` (`/components/motion`); `Screen` gained pull-to-refresh; `lib/alteration-icons.ts` extracted the shared Lucide icon resolver.
+- **Realtime:** `useBooking` subscribes to `postgres_changes` on the row — delivered through RLS, so it reaches signed-in customers; guests (no session) get a `useFocusEffect` refetch + pull-to-refresh instead (the approved trade-off).
+- **Verified:** `npm run typecheck` clean · `npm run lint` clean · iOS production bundle exports · migration applied + RPC smoke-tested.
+- **Deferred:** device verification of the four acceptance criteria (consistent with Phases 0–3); a real `supabase gen types` run — the four migration-007 function types are hand-mirrored into `types/database.ts` because gen-types needs Docker or an access token, neither available here (the signatures are accurate).
+
 ## Open questions / pending decisions
 
 - ✅ GitHub: `main` + `develop` pushed to `https://github.com/srj-naik04/steffny-couture.git`.
@@ -96,6 +107,12 @@
 - ⏳ Confirm: Apple/Google account ownership.
 
 ## Recent changes
+
+### 2026-05-17 — Phase 4
+- Built customer "My bookings": list, detail, reschedule modal; the customer-bookings data layer; `BookingCard`, `StatusTimeline`, `PhotoViewer`, `FadeInView`; pull-to-refresh on `Screen`.
+- Migration `007` applied to remote — guest-access `security definer` functions keyed on the booking UUID (chosen over an email-keyed anon RLS policy, which would leak bookings to email-guessers).
+- `gen types` could not run (no Docker, no access token) — the four new function types are hand-mirrored into `types/database.ts`; replace with a generated run when possible.
+- Realtime works for signed-in customers; guests fall back to refetch-on-focus — true guest realtime needs an anon RLS policy on `bookings`, which would defeat the privacy model.
 
 ### 2026-05-17 — Phase 3
 - Built the customer booking wizard: the 6-step flow, the welcome screen, the bookings feature module, and 6 new UI primitives.
@@ -129,9 +146,9 @@
 
 ## Notes for next session
 
-1. **First action:** merge `feat/phase-3-booking-wizard` → `develop`, then `/phase-start 4`.
-2. Phase 4 (Customer "My bookings"): replace the `(customer)/bookings/index.tsx` placeholder with the real list + `[id]` detail. Query bookings by `customer_id` or a locally-stored guest email — persist the guest's email on submission so guests can see their bookings (the wizard already collects it; store it the same Expo Go-safe way as the draft).
-3. **Device verification still owed:** the four Phase 3 acceptance checks (book end-to-end, photos in Storage, reference match, no data loss on back-navigation) need a physical iPhone. Shop login for the shop side: `steffi@steffnycouture.co.uk` / `Steffny-Couture-2026`.
+1. **First action:** `/phase-start 5` — Shop dashboard (Today, bookings list/kanban/calendar, booking detail + status actions, customers, settings).
+2. **Phase 4 guests:** booking ids are stored on-device (`lib/guest-bookings.ts`); guests read/manage bookings via the migration-007 functions. The remembered ids are the only handle a guest has — clearing app data loses the list (acceptable; documented).
+3. **Device verification still owed:** the Phase 3 checks (book end-to-end, photos in Storage, reference match, no data loss) and the Phase 4 checks (list filters, timeline, realtime status update, WhatsApp link) need a physical iPhone. Shop login: `steffi@steffnycouture.co.uk` / `Steffny-Couture-2026`.
 4. Email Edge Function + templates (CLAUDE.md §1.5–1.6) still owed — schedule after the first demo. Once shipped, wire the two `send-email` calls in `useSubmitBooking` (marked TODO) and the customer + internal booking emails fire on submit.
 5. After any future migration, regenerate types: `npx supabase gen types typescript --linked > types/database.ts`.
 6. `react-native-mmkv` is installed but unused at runtime (ADR-0007) — safe to remove, or keep for dev-build query-cache persistence.
@@ -142,6 +159,8 @@
 
 ## Wins / blockers log
 
+- **2026-05-17 win:** Phase 4 "My bookings" green — list/detail/reschedule, guest-access migration 007 applied + smoke-tested, realtime wired; typecheck + lint clean, iOS bundle exports.
+- **2026-05-17 blocker (resolved):** migration 007 push failed — no Supabase access token in the environment; resolved with the DB password (`supabase db push --db-url`). `gen types` still blocked (needs Docker/token) — function types hand-mirrored instead.
 - **2026-05-17 win:** Phase 3 booking wizard green — 6-step flow, welcome screen, file-system draft persistence, background photo upload, guest submission; typecheck + lint clean, iOS bundle exports.
 - **2026-05-17 win:** Phase 2 auth green — chunked secure-store session persistence, role-based route guards, sign-in + password-reset screens; typecheck + lint clean, iOS bundle exports.
 - **2026-05-17 win:** Phase 1 backend green — 6 migrations applied to remote, RLS smoke test 9/9, typecheck + lint clean.

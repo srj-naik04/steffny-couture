@@ -1,29 +1,8 @@
-import {
-  CircleHelp,
-  Heart,
-  MoveHorizontal,
-  Ruler,
-  Scissors,
-  Shirt,
-  Sparkles,
-  Zap,
-} from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { Card, Text } from '@/components/ui';
 import { colors } from '@/constants/brand';
-
-/** Lucide icons referenced by `alteration_types.icon`. */
-const ICONS: Record<string, typeof CircleHelp> = {
-  Ruler,
-  Scissors,
-  MoveHorizontal,
-  Shirt,
-  Heart,
-  Zap,
-  Sparkles,
-  CircleHelp,
-};
+import { alterationIcon } from '@/lib/alteration-icons';
 
 type Props = {
   label: string;
@@ -41,7 +20,7 @@ export function AlterationTypeCard({
   selected,
   onPress,
 }: Props) {
-  const Icon = (iconName && ICONS[iconName]) || CircleHelp;
+  const Icon = alterationIcon(iconName);
 
   return (
     <Card
