@@ -42,9 +42,11 @@
 
 ## Open questions / pending decisions
 
-- ⏳ **Push pending:** local `git` repo initialised; remote set to `https://github.com/srj-naik04/steffny-couture.git`. Awaiting confirmation to `git push`.
+- ✅ GitHub: `main` + `develop` pushed to `https://github.com/srj-naik04/steffny-couture.git`.
+- ✅ Supabase connection verified — use the **legacy JWT anon key** (in `.env.local`); the `sb_publishable_` key errors on this project. This is an Expo app, so Supabase's Next.js quickstart (`@supabase/ssr`) does not apply.
 - ⏳ MMKV (`react-native-mmkv` v4) is a native module — does NOT run in Expo Go. Phase 2 (session persistence) will either use `expo-secure-store` (Expo Go friendly) or move the demo to a development build. Decide before Phase 2.
 - ⏳ SMTP credentials needed for Phase 1 email Edge Function (a Gmail app password on a dedicated test account for dev).
+- ⏳ Phase 1 Edge Function needs the project's service-role key and legacy JWT secret set as Supabase function secrets (`supabase secrets set`) — never committed.
 - ⏳ Confirm with Bunty: who uses the app day-to-day (role design for Phase 2).
 - ⏳ Confirm: opening price for Bunty.
 - ⏳ Confirm: Apple/Google account ownership.
