@@ -5,6 +5,8 @@
 
 export const alterationTypeKeys = {
   all: ['alteration-types'] as const,
+  /** Every type incl. inactive — the shop settings manager. */
+  admin: ['alteration-types', 'admin'] as const,
 };
 
 export const shopSettingsKeys = {
@@ -18,6 +20,8 @@ export const bookingKeys = {
     [...bookingKeys.all, 'booked-slots', dateId] as const,
   /** The customer's "My bookings" list — scoped to signed-in vs guest. */
   list: (scope: string) => [...bookingKeys.all, 'list', scope] as const,
+  /** Every booking — the shop dashboard's list/kanban/calendar source. */
+  shopList: () => [...bookingKeys.all, 'shop-list'] as const,
   /** One booking's detail. */
   detail: (id: string) => [...bookingKeys.all, 'detail', id] as const,
   /** One booking's status history (audit trail). */

@@ -4,9 +4,9 @@
 
 ## Where we are
 
-**Last updated:** 2026-05-17 — Phase 4 complete
-**Current phase:** Phase 4 — Customer "My bookings" ✅ DONE
-**Next milestone:** Phase 5 — Shop dashboard + kanban
+**Last updated:** 2026-05-17 — Phase 5 complete
+**Current phase:** Phase 5 — Shop dashboard ✅ DONE
+**Next milestone:** Phase 6 — Notifications
 
 ## Status
 
@@ -20,7 +20,7 @@
 - ✅ **Phase 2: Authentication — DONE**
 - ✅ **Phase 3: Customer booking wizard — DONE**
 - ✅ **Phase 4: My bookings (customer side) — DONE**
-- ⬜ Phase 5: Shop dashboard + kanban
+- ✅ **Phase 5: Shop dashboard + kanban — DONE**
 - ⬜ Phase 6: Notifications (email + push)
 - ⬜ Phase 7: Polish (motion, haptics, accessibility)
 - ⬜ Phase 8: Demo prep (seed, branding, build)
@@ -94,6 +94,19 @@
 - **Verified:** `npm run typecheck` clean · `npm run lint` clean · iOS production bundle exports · migration applied + RPC smoke-tested.
 - **Deferred:** device verification of the four acceptance criteria (consistent with Phases 0–3); a real `supabase gen types` run — the four migration-007 function types are hand-mirrored into `types/database.ts` because gen-types needs Docker or an access token, neither available here (the signatures are accurate).
 
+## Phase 5 — what was built
+
+- **Migration `008_shop_manual_bookings`** — applied to remote. A `bookings` INSERT policy for staff (`is_staff()`); migration 003 only allowed guest/customer inserts, so walk-in bookings were refused.
+- **Shop data layer** (`features/bookings/`): `api/shop-bookings.ts` (fetch-all, status/field updates, manual-booking insert); hooks `useShopBookings` (list + Realtime on the `bookings` table), `useUpdateBookingStatus`, `useUpdateBooking`, `useCreateManualBooking`. Detail reuses Phase 4's `useBooking`/`useBookingHistory`/`useBookingPhotos`.
+- **Customers feature** (`features/customers/`): pure `aggregateCustomers` / `findCustomer` — there is no customers table; a customer is bookings grouped by normalised phone (then email).
+- **Settings feature** (`features/settings/`): `updateShopSettings`, alteration-type admin (`useAllAlterationTypes`, upsert, active-toggle).
+- **Shop shell** — `(shop)/_layout.tsx` is now bottom tabs (Today · Bookings · Customers · Settings); `bookings/` and `customers/` are nested stacks.
+- **Screens:** Today (greeting, KPI strip, today's list, "needs a quote", FAB); Bookings with a List/Kanban/Calendar segmented switcher; shop booking detail (editable price/final/notes saved on blur, status actions, customer contact, audit timeline); manual-booking modal; customers list + detail (spend, history); settings (opening hours, blocked dates, slot length, alteration-service manager, sign out).
+- **Components:** `KpiTile`, `ShopBookingCard`, `KanbanBoard`/`KanbanCard` (long-press drag-and-drop, column z-lift, board-scroll lock while dragging), `CustomerRow`, `StatusActions`, `BookingCalendar`, `TimeChips`; new UI primitives `Segmented` + `Fab`.
+- **Kanban drag** — long-press a card, drag across columns; the drop column (from `absoluteX + scrollX`) sets the status. Non-optimistic: the card springs home and the board refetches, so a failed update naturally reverts.
+- **Verified:** `npm run typecheck` clean · `npm run lint` clean (0 problems) · iOS production bundle exports · migration 008 applied.
+- **Deferred:** status-change emails (the `TODO(phase-1-email)` in `use-update-booking-status.ts`) ride with the Phase 6 email work; alteration-type management does create/edit/active-toggle but not icon-picking or hard delete (active-toggle replaces delete by design). Device verification carried as in Phases 0–4.
+
 ## Open questions / pending decisions
 
 - ✅ GitHub: `main` + `develop` pushed to `https://github.com/srj-naik04/steffny-couture.git`.
@@ -107,6 +120,12 @@
 - ⏳ Confirm: Apple/Google account ownership.
 
 ## Recent changes
+
+### 2026-05-17 — Phase 5
+- Built the shop dashboard: bottom-tab shell, Today, Bookings (list/kanban/calendar), booking detail, manual booking, customers, settings.
+- Migration `008` applied — staff INSERT policy so walk-in bookings can be created.
+- Kanban drag-and-drop: long-press a card, drop it on a column to change status; non-optimistic so a failed update reverts on refetch.
+- Status-change emails deferred to the Phase 6 email work (`TODO(phase-1-email)` marked in `use-update-booking-status.ts`).
 
 ### 2026-05-17 — Phase 4
 - Built customer "My bookings": list, detail, reschedule modal; the customer-bookings data layer; `BookingCard`, `StatusTimeline`, `PhotoViewer`, `FadeInView`; pull-to-refresh on `Screen`.
@@ -146,7 +165,7 @@
 
 ## Notes for next session
 
-1. **First action:** `/phase-start 5` — Shop dashboard (Today, bookings list/kanban/calendar, booking detail + status actions, customers, settings).
+1. **First action:** `/phase-start 6` — Notifications (Expo push, in-app notification centre, email lifecycle, WhatsApp deep links). This is also where the deferred `send-email` Edge Function + 5 react-email templates (CLAUDE.md §1.5/§1.6) finally land, plus the `TODO(phase-1-email)` call sites in `useSubmitBooking` and `useUpdateBookingStatus`.
 2. **Phase 4 guests:** booking ids are stored on-device (`lib/guest-bookings.ts`); guests read/manage bookings via the migration-007 functions. The remembered ids are the only handle a guest has — clearing app data loses the list (acceptable; documented).
 3. **Device verification still owed:** the Phase 3 checks (book end-to-end, photos in Storage, reference match, no data loss) and the Phase 4 checks (list filters, timeline, realtime status update, WhatsApp link) need a physical iPhone. Shop login: `steffi@steffnycouture.co.uk` / `Steffny-Couture-2026`.
 4. Email Edge Function + templates (CLAUDE.md §1.5–1.6) still owed — schedule after the first demo. Once shipped, wire the two `send-email` calls in `useSubmitBooking` (marked TODO) and the customer + internal booking emails fire on submit.
@@ -159,6 +178,7 @@
 
 ## Wins / blockers log
 
+- **2026-05-17 win:** Phase 5 shop dashboard green — tab shell, Today, list/kanban/calendar, detail, manual booking, customers, settings; kanban drag-and-drop working; migration 008 applied; typecheck + lint clean, iOS bundle exports.
 - **2026-05-17 win:** Phase 4 "My bookings" green — list/detail/reschedule, guest-access migration 007 applied + smoke-tested, realtime wired; typecheck + lint clean, iOS bundle exports.
 - **2026-05-17 blocker (resolved):** migration 007 push failed — no Supabase access token in the environment; resolved with the DB password (`supabase db push --db-url`). `gen types` still blocked (needs Docker/token) — function types hand-mirrored instead.
 - **2026-05-17 win:** Phase 3 booking wizard green — 6-step flow, welcome screen, file-system draft persistence, background photo upload, guest submission; typecheck + lint clean, iOS bundle exports.
