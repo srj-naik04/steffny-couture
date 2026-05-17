@@ -15,6 +15,8 @@ import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { OfflineBanner } from '@/components/ui/offline-banner';
+import { ToastHost } from '@/components/ui/toast';
 import { queryClient } from '@/lib/query-client';
 
 import { AuthProvider, useAuth } from '@/features/auth';
@@ -65,6 +67,8 @@ function RootNavigator() {
         <Stack.Screen name="(auth)" />
       </Stack>
       <DevViewSwitcher />
+      <ToastHost />
+      <OfflineBanner />
       <StatusBar style="dark" />
     </>
   );

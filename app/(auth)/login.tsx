@@ -51,7 +51,7 @@ export default function Login() {
   const busy = isSubmitting || (!!session && isLoading);
 
   return (
-    <Screen scroll className="pt-16">
+    <Screen scroll keyboardAvoiding className="pt-16">
       <Box className="gap-2">
         <Text variant="caption" className="uppercase text-gold">
           Steffny Couture

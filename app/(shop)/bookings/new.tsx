@@ -109,7 +109,7 @@ export default function NewManualBooking() {
   };
 
   return (
-    <Screen scroll edges={['top', 'bottom']} className="pb-6">
+    <Screen scroll keyboardAvoiding edges={['top', 'bottom']} className="pb-6">
       <Box className="flex-row items-center justify-between pb-2 pt-2">
         <Text variant="section">New booking</Text>
         <PressableScale

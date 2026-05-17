@@ -160,7 +160,7 @@ export default function ResetPassword() {
   // --- Choose a new password (recovery session active) ----------------------
   if (phase === 'update') {
     return (
-      <Screen scroll className="pt-16">
+      <Screen scroll keyboardAvoiding className="pt-16">
         <Box className="gap-2">
           <Text variant="caption" className="uppercase text-gold">
             Steffny Couture
@@ -229,7 +229,7 @@ export default function ResetPassword() {
   // --- Recovery email sent --------------------------------------------------
   if (phase === 'sent') {
     return (
-      <Screen scroll className="pt-16">
+      <Screen scroll keyboardAvoiding className="pt-16">
         <Box className="items-center gap-3">
           <MailCheck size={48} color={colors.rose} strokeWidth={1.5} />
           <Text variant="section" className="text-center">
@@ -258,7 +258,7 @@ export default function ResetPassword() {
 
   // --- Request a reset link (default) ---------------------------------------
   return (
-    <Screen scroll className="pt-16">
+    <Screen scroll keyboardAvoiding className="pt-16">
       <Box className="gap-2">
         <Text variant="caption" className="uppercase text-gold">
           Steffny Couture
