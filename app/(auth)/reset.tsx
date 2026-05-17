@@ -178,11 +178,13 @@ export default function ResetPassword() {
             render={({ field }) => (
               <Input
                 label="New password"
+                required
                 value={field.value}
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
                 error={updateForm.formState.errors.password?.message}
                 helperText="At least 8 characters."
+                placeholder="Enter new password"
                 secureTextEntry
                 autoCapitalize="none"
                 autoComplete="new-password"
@@ -198,10 +200,12 @@ export default function ResetPassword() {
             render={({ field }) => (
               <Input
                 label="Confirm password"
+                required
                 value={field.value}
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
                 error={updateForm.formState.errors.confirmPassword?.message}
+                placeholder="Re-enter new password"
                 secureTextEntry
                 autoCapitalize="none"
                 autoComplete="new-password"
@@ -276,11 +280,12 @@ export default function ResetPassword() {
           render={({ field }) => (
             <Input
               label="Email"
+              required
               value={field.value}
               onChangeText={field.onChange}
               onBlur={field.onBlur}
               error={requestForm.formState.errors.email?.message}
-              placeholder="you@steffnycouture.co.uk"
+              placeholder="Enter email"
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="email-address"

@@ -33,7 +33,9 @@ export default function ContactStep() {
     resolver: zodResolver(contactSchema),
     defaultValues: {
       name: draft.name || profile?.full_name || '',
-      phone: draft.phone || profile?.phone || '',
+      // Pre-fill the UK dialling code — the studio is London-based, so a
+      // local mobile is by far the common case.
+      phone: draft.phone || profile?.phone || '+44',
       email: draft.email || session?.user.email || '',
       saveDetails: draft.saveDetails,
     },
@@ -76,11 +78,12 @@ export default function ContactStep() {
           render={({ field }) => (
             <Input
               label="Full name"
+              required
               value={field.value}
               onChangeText={field.onChange}
               onBlur={field.onBlur}
               error={errors.name?.message}
-              placeholder="Emily Carter"
+              placeholder="Enter full name"
               autoCapitalize="words"
               autoComplete="name"
               textContentType="name"
@@ -95,12 +98,13 @@ export default function ContactStep() {
           render={({ field }) => (
             <Input
               label="Phone"
+              required
               value={field.value}
               // Keep only digits and a leading "+"; the schema validates a UK mobile.
               onChangeText={(text) => field.onChange(text.replace(/[^\d+]/g, ''))}
               onBlur={field.onBlur}
               error={errors.phone?.message}
-              placeholder="07834 877992"
+              placeholder="Enter phone number"
               keyboardType="phone-pad"
               autoComplete="tel"
               textContentType="telephoneNumber"
@@ -114,11 +118,12 @@ export default function ContactStep() {
           render={({ field }) => (
             <Input
               label="Email"
+              required
               value={field.value}
               onChangeText={field.onChange}
               onBlur={field.onBlur}
               error={errors.email?.message}
-              placeholder="emily@example.com"
+              placeholder="Enter email address"
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="email-address"

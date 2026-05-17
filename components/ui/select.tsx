@@ -12,6 +12,8 @@ export type SelectOption = { label: string; value: string };
 type Props = {
   /** Always visible — never use the placeholder as a label (brand rule). */
   label: string;
+  /** Mark the field mandatory — appends a rose asterisk to the label. */
+  required?: boolean;
   value: string | null;
   options: SelectOption[];
   onChange: (value: string) => void;
@@ -27,6 +29,7 @@ type Props = {
  */
 export function Select({
   label,
+  required = false,
   value,
   options,
   onChange,
@@ -41,6 +44,7 @@ export function Select({
     <View className={`gap-1.5 ${className ?? ''}`}>
       <Text variant="caption" className="uppercase text-inkMuted">
         {label}
+        {required ? <Text className="text-rose">{' *'}</Text> : null}
       </Text>
       <PressableScale
         haptic="selection"

@@ -96,6 +96,7 @@ export default function DetailsStep() {
           render={({ field }) => (
             <Select
               label="Garment type"
+              required
               value={field.value || null}
               options={DRESS_OPTIONS}
               onChange={field.onChange}
@@ -111,6 +112,7 @@ export default function DetailsStep() {
           render={({ field }) => (
             <Textarea
               label="What would you like done?"
+              required
               value={field.value}
               onChangeText={field.onChange}
               onBlur={field.onBlur}

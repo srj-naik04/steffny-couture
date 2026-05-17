@@ -124,13 +124,15 @@ export default function NewManualBooking() {
       <Box className="mt-4 gap-4">
         <Input
           label="Customer name"
-          placeholder="e.g. Amara Okafor"
+          required
+          placeholder="Enter customer name"
           value={name}
           onChangeText={setName}
         />
         <Input
           label="Phone"
-          placeholder="07834 877992"
+          required
+          placeholder="Enter phone number"
           keyboardType="phone-pad"
           value={phone}
           onChangeText={setPhone}
@@ -142,7 +144,7 @@ export default function NewManualBooking() {
         />
         <Input
           label="Email (optional)"
-          placeholder="amara@example.com"
+          placeholder="Enter email address"
           keyboardType="email-address"
           autoCapitalize="none"
           value={email}
@@ -150,6 +152,7 @@ export default function NewManualBooking() {
         />
         <Select
           label="Alteration"
+          required
           value={alterationTypeId}
           options={TYPE_OPTIONS}
           placeholder="Choose the type of work"
@@ -164,7 +167,8 @@ export default function NewManualBooking() {
         />
         <Textarea
           label="What needs doing"
-          placeholder="Take in the waist by an inch, shorten hem to ankle…"
+          required
+          placeholder="Describe the work — e.g. take in the waist, shorten hem to ankle"
           value={description}
           onChangeText={setDescription}
         />

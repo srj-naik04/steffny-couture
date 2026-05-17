@@ -69,11 +69,12 @@ export default function Login() {
           render={({ field }) => (
             <Input
               label="Email"
+              required
               value={field.value}
               onChangeText={field.onChange}
               onBlur={field.onBlur}
               error={errors.email?.message}
-              placeholder="you@steffnycouture.co.uk"
+              placeholder="Enter email"
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="email-address"
@@ -90,10 +91,12 @@ export default function Login() {
           render={({ field }) => (
             <Input
               label="Password"
+              required
               value={field.value}
               onChangeText={field.onChange}
               onBlur={field.onBlur}
               error={errors.password?.message}
+              placeholder="Enter password"
               secureTextEntry
               autoCapitalize="none"
               autoComplete="current-password"

@@ -7,6 +7,8 @@ import { colors } from '@/constants/brand';
 type Props = Omit<TextInputProps, 'className'> & {
   /** Always visible — never use the placeholder as a label (brand rule). */
   label: string;
+  /** Mark the field mandatory — appends a rose asterisk to the label. */
+  required?: boolean;
   error?: string;
   helperText?: string;
   /** Classes for the outer container. */
@@ -17,11 +19,19 @@ type Props = Omit<TextInputProps, 'className'> & {
  * Labelled text input. The label is always visible above the field; the
  * placeholder is for example content only. Shows an inline error with icon.
  */
-export function Input({ label, error, helperText, className, ...props }: Props) {
+export function Input({
+  label,
+  required = false,
+  error,
+  helperText,
+  className,
+  ...props
+}: Props) {
   return (
     <View className={`gap-1.5 ${className ?? ''}`}>
       <Text variant="caption" className="uppercase text-inkMuted">
         {label}
+        {required ? <Text className="text-rose">{' *'}</Text> : null}
       </Text>
       <TextInput
         accessibilityLabel={label}

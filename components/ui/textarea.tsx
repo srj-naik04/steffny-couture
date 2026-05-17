@@ -7,6 +7,8 @@ import { colors } from '@/constants/brand';
 type Props = Omit<TextInputProps, 'className' | 'multiline'> & {
   /** Always visible — never use the placeholder as a label (brand rule). */
   label: string;
+  /** Mark the field mandatory — appends a rose asterisk to the label. */
+  required?: boolean;
   error?: string;
   helperText?: string;
   /** Show a "current / max" character counter. Requires `maxLength`. */
@@ -21,6 +23,7 @@ type Props = Omit<TextInputProps, 'className' | 'multiline'> & {
  */
 export function Textarea({
   label,
+  required = false,
   error,
   helperText,
   showCount = false,
@@ -36,6 +39,7 @@ export function Textarea({
       <View className="flex-row items-center justify-between">
         <Text variant="caption" className="uppercase text-inkMuted">
           {label}
+          {required ? <Text className="text-rose">{' *'}</Text> : null}
         </Text>
         {showCount && maxLength ? (
           <Text variant="caption" className="text-inkSubtle">
