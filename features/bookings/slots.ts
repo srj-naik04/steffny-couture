@@ -46,6 +46,11 @@ export function upcomingDays(count: number): Date[] {
   return Array.from({ length: count }, (_, i) => addDays(start, i));
 }
 
+/** The latest date a customer may book — today plus the booking horizon. */
+export function maxBookableDateId(): string {
+  return toDateId(addDays(nowInLondon(), MAX_BOOKING_DAYS_AHEAD));
+}
+
 function toMinutes(hhmm: string): number {
   const [h, m] = hhmm.split(':').map(Number);
   return (h ?? 0) * 60 + (m ?? 0);

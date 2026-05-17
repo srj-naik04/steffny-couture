@@ -31,6 +31,7 @@ export {
 export {
   slotsForDate,
   upcomingDays,
+  maxBookableDateId,
   isSlotPast,
   isDateBlocked,
   toDateId,
