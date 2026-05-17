@@ -24,7 +24,7 @@
     "android": {
       "package": "uk.co.steffnycouture.app",
       "adaptiveIcon": {
-        "backgroundColor": "#FAF7F2",
+        "backgroundColor": "#7C2D3E",
         "foregroundImage": "./assets/android-icon-foreground.png"
       }
     },

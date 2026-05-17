@@ -1,0 +1,8 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" xmlns="http://www.w3.org/2000/svg">
+  <!-- Splash logotype — shown contained on the ivory splash background. -->
+  <text x="640" y="300" font-family="Georgia, 'Times New Roman', serif"
+        font-size="116" font-weight="700" fill="#7C2D3E" text-anchor="middle">Steffny Couture</text>
+  <rect x="540" y="356" width="200" height="5" fill="#C9A961"/>
+  <text x="640" y="430" font-family="Georgia, 'Times New Roman', serif"
+        font-size="34" fill="#9A9089" text-anchor="middle" letter-spacing="9">CRAFTED IN LONDON</text>
+</svg>

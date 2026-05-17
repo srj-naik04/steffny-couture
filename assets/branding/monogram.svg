@@ -1,0 +1,7 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Android adaptive-icon foreground — monogram only, sized inside the
+       centre safe zone, on a transparent background (the rose comes from
+       android.adaptiveIcon.backgroundColor). -->
+  <text x="512" y="616" font-family="Georgia, 'Times New Roman', serif"
+        font-size="340" font-weight="700" fill="#FAF7F2" text-anchor="middle">SC</text>
+</svg>
