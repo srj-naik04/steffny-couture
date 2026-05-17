@@ -74,13 +74,30 @@ Commit the regenerated file alongside any schema migration.
 
 ## Migrations Inventory
 
-(Update as migrations are added.)
+```
+001_initial_schema.sql         — 6 tables, indexes, updated_at + profile +
+                                 booking-status-history triggers (no RLS)
+002_rls_helpers.sql            — current_user_role, is_staff, is_manager,
+                                 can_edit_bookings (security-definer)
+003_rls_policies.sql           — enable RLS + policies on all 6 tables
+004_storage_buckets.sql        — booking-photos (private) + profile-avatars
+                                 (public) buckets and their object policies
+005_seed_alteration_types.sql  — 8 types (Hem, Take in, … Something else)
+006_grants.sql                 — table/sequence/function grants to the API
+                                 roles (raw-SQL tables miss Supabase defaults)
+```
 
-```
-001_initial_schema.sql        — tables, no RLS yet
-002_rls_helpers.sql            — current_user_role, is_staff, is_manager
-003_rls_policies.sql           — RLS on all tables
-004_seed_alteration_types.sql  — Hem, Take In, etc.
-005_seed_shop_settings.sql     — Singleton row
-...
-```
+Applied to the remote project (`dugooqvhxgzfdrowwnck`) via `supabase db push`.
+The `shop_settings` singleton row is inserted by migration 001.
+
+## Seed Accounts
+
+- **Shop owner** — `steffi@steffnycouture.co.uk`, role `manager`. Created by
+  `scripts/seed-shop-user.mjs` (service-role admin API). Temporary password is
+  shared out-of-band; reset via the Phase 2 password-reset flow.
+
+## Deferred to post-demo
+
+- `send-email` Edge Function (CLAUDE.md §1.5) and the 5 react-email templates
+  (§1.6). The booking status trigger logs history only — no email call yet.
+  The `pg_net` HTTP call is added when email work resumes.
