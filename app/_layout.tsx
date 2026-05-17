@@ -17,13 +17,47 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { queryClient } from '@/lib/query-client';
 
-// Customer is the public, default experience; role-based gating arrives in Phase 2.
+import { AuthProvider, useAuth } from '@/features/auth';
+
+// Customer is the public, default experience; staff are routed to the shop
+// group by the guard in app/(shop)/_layout.tsx.
 export const unstable_settings = {
   initialRouteName: '(customer)',
 };
 
-// Hold the native splash until fonts are ready so text never flashes unstyled.
+// Hold the native splash until fonts AND the auth session are ready, so text
+// never flashes unstyled and a returning shop user never flashes the customer
+// screen before the route guard runs.
 SplashScreen.preventAutoHideAsync();
+
+/**
+ * Renders the navigator once auth has resolved. Lives inside `AuthProvider`
+ * so it can read `useAuth()`; keeps the splash up until the session is known.
+ */
+function RootNavigator() {
+  const { isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading) SplashScreen.hideAsync();
+  }, [isLoading]);
+
+  if (isLoading) return null;
+
+  return (
+    <>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: '#FAF7F2' },
+        }}>
+        <Stack.Screen name="(customer)" />
+        <Stack.Screen name="(shop)" />
+        <Stack.Screen name="(auth)" />
+      </Stack>
+      <StatusBar style="dark" />
+    </>
+  );
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -34,12 +68,6 @@ export default function RootLayout() {
     Inter_600SemiBold,
   });
 
-  useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded, fontError]);
-
   // Keep the splash up until fonts resolve (or fail — we still boot).
   if (!fontsLoaded && !fontError) return null;
 
@@ -47,12 +75,9 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#FAF7F2' } }}>
-            <Stack.Screen name="(customer)" />
-            <Stack.Screen name="(shop)" />
-            <Stack.Screen name="(auth)" />
-          </Stack>
-          <StatusBar style="dark" />
+          <AuthProvider>
+            <RootNavigator />
+          </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

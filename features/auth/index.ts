@@ -1,5 +1,6 @@
 /** Public surface of the auth feature. Screens import from here. */
 export { AuthProvider, useAuth } from '@/features/auth/hooks/use-auth';
+export { useViewOverride } from '@/features/auth/hooks/use-view-override';
 export {
   signIn,
   signOut,
